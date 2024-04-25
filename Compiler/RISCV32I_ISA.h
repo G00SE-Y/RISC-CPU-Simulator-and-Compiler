@@ -28,52 +28,50 @@ J-type: opcode: 7   rd:5        imm[19:12]:8    imm[11]:1   imm[10:1]:10    imm[
 
 */
 
-//OPCODES TODO
-
 
 enum BaseInt{
 
     NO_OP =    -1,
 
-
-    NOP =       0,  // Incremement PC                               Immediate?
-    LUI =       1,  // Load Unsigned Immediate                      U-type
-    AUIPC =     2,  // Add Upper Immediate Program Counter          U-type
-    JAL =       3,  // Jump and Link                                U-type
-    JALR =      4,  // Jump and Link Register                       I-type
-    BEQ =       5,  // Brach if Equal                               B-type
-    BNE =       6,  // Branch if Not Equal                          B-type
-    BLT =       7,  // Branch if Less Than                          B-type
-    BGE =       8,  // Branch if Greater Than                       B-type
-    BLTU =      9,  // Branch if Less Than Unsigned                 B-type
-    BGEU =      10, // Branch if Greater Than Unsigned              B-type
-    LB =        11, // Load Byte                                    I-type
-    LH =        12, // Load Halfword                                I-type
-    LW =        13, // Load Word                                    I-type
-    LBU =       14, // Load Byte Unsigned                           I-type
-    LHU =       15, // Load Halfword Unsigned                       I-type
-    SB =        16, // Store Byte                                   S-type
-    SH =        17, // Store Halfword                               S-type
-    SW =        18, // Store Word                                   S-type
-    ADDI =      19, // Add Immediate                                I-type
-    SLTI =      20, // Set Less Than Immediate                      I-type
-    SLTIU =     21, // Set Less Than Immediate Unsigned             I-type
-    XORI =      22, // XOR Immediate                                I-type
-    ORI =       23, // OR Immediate                                 I-type
-    ANDI =      24, // AND Immediate                                I-type
-    SLLI =      25, // Shift Left Logical Immediate                 R-type
-    SRLI =      26, // Shift Right Logic Immediate                  R-type
-    SRAI =      27, // Shift Right Arithmetic Immediate             R-type
-    ADD =       28, // Add                                          R-type
-    SUB =       29, // Subtract                                     R-type
-    SLL =       30, // Shift Left Logical                           R-type
-    SLT =       31, // Set Less Than                                R-type
-    SLTU =      32, // Set Less Than Unsigned                       R-type
-    XOR =       33, // XOR                                          R-type
-    SRL =       34, // Shift Right Logical                          R-type
-    SRA =       35, // Shift Right Arithmetic                       R-type
-    OR =        36, // OR                                           R-type
-    AND =       37  // AND                                          R-type
+                    //                                                                  OP Codes
+    NOP =       0,  // Incremement PC                               Immediate?          N/A
+    LUI =       1,  // Load Unsigned Immediate                      U-type              0110111
+    AUIPC =     2,  // Add Upper Immediate Program Counter          U-type              0010111
+    JAL =       3,  // Jump and Link                                U-type              1101111
+    JALR =      4,  // Jump and Link Register                       I-type              1100111
+    BEQ =       5,  // Brach if Equal                               B-type              1100011
+    BNE =       6,  // Branch if Not Equal                          B-type              1100011
+    BLT =       7,  // Branch if Less Than                          B-type              1100011
+    BGE =       8,  // Branch if Greater Than                       B-type              1100011
+    BLTU =      9,  // Branch if Less Than Unsigned                 B-type              1100011
+    BGEU =      10, // Branch if Greater Than Unsigned              B-type              1100011
+    LB =        11, // Load Byte                                    I-type              0000011
+    LH =        12, // Load Halfword                                I-type              0000011
+    LW =        13, // Load Word                                    I-type              0000011
+    LBU =       14, // Load Byte Unsigned                           I-type              0000011
+    LHU =       15, // Load Halfword Unsigned                       I-type              0000011
+    SB =        16, // Store Byte                                   S-type              0100011
+    SH =        17, // Store Halfword                               S-type              0100011
+    SW =        18, // Store Word                                   S-type              0100011
+    ADDI =      19, // Add Immediate                                I-type              0010011
+    SLTI =      20, // Set Less Than Immediate                      I-type              0010011
+    SLTIU =     21, // Set Less Than Immediate Unsigned             I-type              0010011
+    XORI =      22, // XOR Immediate                                I-type              0010011
+    ORI =       23, // OR Immediate                                 I-type              0010011
+    ANDI =      24, // AND Immediate                                I-type              0010011
+    SLLI =      25, // Shift Left Logical Immediate                 R-type              0010011
+    SRLI =      26, // Shift Right Logic Immediate                  R-type              0010011
+    SRAI =      27, // Shift Right Arithmetic Immediate             R-type              0010011
+    ADD =       28, // Add                                          R-type              0110011
+    SUB =       29, // Subtract                                     R-type              0110011
+    SLL =       30, // Shift Left Logical                           R-type              0110011
+    SLT =       31, // Set Less Than                                R-type              0110011
+    SLTU =      32, // Set Less Than Unsigned                       R-type              0110011
+    XOR =       33, // XOR                                          R-type              0110011
+    SRL =       34, // Shift Right Logical                          R-type              0110011
+    SRA =       35, // Shift Right Arithmetic                       R-type              0110011
+    OR =        36, // OR                                           R-type              0110011
+    AND =       37  // AND                                          R-type              0110011
 
 };
 
