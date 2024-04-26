@@ -8,12 +8,6 @@
 
 #include "RISCV32I_ISA.h"
 
-typedef struct Token {
-    token_type type =  NO_TOK;
-    BaseInt32_Instruction operation = NO_OP;
-    std::string value = ""; // register identifier or numeric immediate
-}token;
-
 /*
 NO_TOK: Unidentified token and will result in a compiler error during parsing
 
@@ -26,18 +20,24 @@ IMM:    A numeric value in base 10 (default immediate)
 
 enum token_type {NO_TOK = 0, OP = 1, REG = 2, IMM = 3};
 
+typedef struct Token {
+    token_type type =  NO_TOK;
+    BaseInt32_Instruction operation = NO_OP;
+    std::string value; // register identifier or numeric immediate
+}token;
+
 class Tokenizer {
 
     public:
-        std::vector<std::vector<token>> tokenize(std::vector<std::string> code);
+        std::vector<std::vector<token>> tokenize(const std::vector<std::string>& code);
 
     private:
-        std::vector<token> tokenize_line(std::string line);
-        token identify_token(std::string s);
+        static std::vector<token> tokenize_line(const std::string& line);
+        static token identify_token(const std::string& s);
 
-        BaseInt32_Instruction Tokenizer::is_op(std::string s);
-        std::string Tokenizer::is_reg(std::string s);
-        std::string Tokenizer::is_imm(std::string s);
+        static BaseInt32_Instruction is_op(const std::string& s);
+        static std::string is_reg(std::string s);
+        static std::string is_imm(std::string s);
 };
 
 
