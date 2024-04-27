@@ -31,7 +31,10 @@ namespace Tokenizer {
                 std::cout << "Line " << i++ << std::endl;
                 for(auto tok: line) {
 
-                    std::cout << "Operation: " << tok.operation << "\t\tType of token: " << tok.type << "\t\tValue: " << tok.value << std::endl;
+                    if(tok.operation != BaseInt32_Instruction::NO_OP)
+                        std::cout << "Operation: " << tok.operation << std::endl;
+                    else
+                        std::cout << "\t\t\tType of token: " << tok.type << "\t\tValue: " << tok.value << std::endl;
                 }
                 std::cout << std::endl;
             }
@@ -92,7 +95,7 @@ namespace Tokenizer {
         matches any string that consists of a `$`, then has a lowercase letter and a digit in that order
         e.g.) "$a0", "$z9"
         */
-        const std::regex re_register("^\\$[a-z][0-9]$");
+        const std::regex re_register("^\\$[a-z]+[0-9]{0,2}$");
 
         /*
         matches with a `-` or nothing followed by any sequence of 1 or more digits
@@ -102,12 +105,8 @@ namespace Tokenizer {
 
         std::string is_reg(std::string s) {
 
-            if(s[0] == '$' && s.length() >= 3) {
-
-                std::string suffix = s.substr(1);
-                if(std::regex_match(suffix, re_register)) {
-                    return suffix;
-                }
+            if(std::regex_match(s, re_register)) {
+                return s.substr(1);
             }
 
             return "";
@@ -119,7 +118,7 @@ namespace Tokenizer {
             if(std::regex_match(s, re_imm10)) return s;
             else return "";
         }
-        
+
     } // End of anonymous namespace
 
     
@@ -135,7 +134,7 @@ namespace Tokenizer {
             tokens.push_back(tokenize_line(line));
         }
 
-        prettyPrintTokens(tokens);
+        prettyPrintTokens(tokens); // debug
 
         return tokens;    
     }

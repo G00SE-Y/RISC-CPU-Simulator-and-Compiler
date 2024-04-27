@@ -75,6 +75,13 @@ enum BaseInt32_Instruction {
 
 };
 
+/*
+Possible additions to ISA:
+
+Jump (J)
+
+*/ 
+
 const std::unordered_map<std::string, BaseInt32_Instruction> str_ins_BI32 {
         {"nop",         BaseInt32_Instruction::NOP},
         {"lui",         BaseInt32_Instruction::LUI},
