@@ -9,47 +9,23 @@
 
 namespace Tokenizer {
 
-
-    /*
-
-    */
-    std::vector<Tokenizer::token> tokenize_line(std::string line) {
-
-        std::vector<Tokenizer::token> tokens;
-        std::vector<std::string> symbols;
-
-        // split line by whitespace and copy into symbols
-        std::istringstream iss(line);
-        std::copy(std::istream_iterator<std::string>(iss), 
-            std::istream_iterator<std::string>(),
-            std::back_inserter(symbols)
-        );
-
-        for(auto symbol: symbols) {
-            tokens.push_back(identify_token(symbol));
-        }
-
-        return tokens;
-    }
-
-    // Anonymous Namespace
+    // Anonymous Namespace to define helper functions
     namespace {
 
 
-        // Private Function Definitions
-        std::vector<token> tokenize_line(std::string line); // Takes a single vector of string symbols and identifies them as tokens
-        token identify_token(std::string s); // Identifies a string as a token
-        BaseInt32_Instruction Tokenizer::is_op(std::string s); // Determines which operation a string is
-        std::string Tokenizer::is_reg(std::string s); // Determines if a string is a register name
-        std::string Tokenizer::is_imm(std::string s); // determines if the string is an immediate 
-        void prettyPrintTokens(std::vector<std::vector<token>> tokens); // Debug: prints all token data
+        // Private Function Declarations
+        std::vector<Tokenizer::token> tokenize_line(std::string line); // Takes a single vector of string symbols and identifies them as tokens
+        Tokenizer::token identify_token(std::string s); // Identifies a string as a token
+        BaseInt32_Instruction is_op(std::string s); // Determines which operation a string is
+        std::string is_reg(std::string s); // Determines if a string is a register name
+        std::string is_imm(std::string s); // determines if the string is an immediate 
+        void prettyPrintTokens(std::vector<std::vector<Tokenizer::token>> tokens); // Debug: prints all token data
 
 
-
-
+        // Function Definitions
 
         void prettyPrintTokens(std::vector<std::vector<Tokenizer::token>> tokens) {
-    
+
             int i = 1;
             for(auto line: tokens) {
                 std::cout << "Line " << i++ << std::endl;
@@ -62,38 +38,39 @@ namespace Tokenizer {
         }
 
 
+        std::vector<Tokenizer::token> tokenize_line(std::string line) {
 
-        /*
-        Takes a vector of strings in ASM and converts it into a vector of identified tokens
-        */
-        std::vector<std::vector<Tokenizer::token>> tokenize(std::vector<std::string> code) {
+            std::vector<Tokenizer::token> tokens;
+            std::vector<std::string> symbols;
 
-            std::vector<std::vector<token>> tokens;
+            // split line by whitespace and copy into symbols
+            std::istringstream iss(line);
+            std::copy(std::istream_iterator<std::string>(iss), 
+                std::istream_iterator<std::string>(),
+                std::back_inserter(symbols)
+            );
 
-            for(auto line: code) {
-
-                tokens.push_back(tokenize_line(line));
+            for(auto symbol: symbols) {
+                tokens.push_back(identify_token(symbol));
             }
 
-            prettyPrintTokens(tokens);
-
-            return tokens;    
+            return tokens;
         }
 
 
 
         Tokenizer::token identify_token(std::string s) {
 
-            token t;
+            Tokenizer::token t;
             
             if((t.operation = is_op(s)) != BaseInt32_Instruction::NO_OP) { // if operation
-                t.type = token_type::OP;
+                t.type = Tokenizer::token_type::OP;
             }
             else if((t.value = is_reg(s)) != "") { // if register
-                t.type = token_type::REG;
+                t.type = Tokenizer::token_type::REG;
             }
             else if((t.value = is_imm(s)) != "") { // if immediate
-                t.type = token_type::IMM;
+                t.type = Tokenizer::token_type::IMM;
             }
 
             return t;
@@ -142,7 +119,25 @@ namespace Tokenizer {
             if(std::regex_match(s, re_imm10)) return s;
             else return "";
         }
+        
+    } // End of anonymous namespace
+
+    
+    /*
+    Takes a vector of strings in ASM and converts it into a vector of identified tokens
+    */
+    std::vector<std::vector<Tokenizer::token>> tokenize(std::vector<std::string> code) {
+
+        std::vector<std::vector<Tokenizer::token>> tokens;
+
+        for(auto line: code) {
+
+            tokens.push_back(tokenize_line(line));
+        }
+
+        prettyPrintTokens(tokens);
+
+        return tokens;    
     }
 }
-
 

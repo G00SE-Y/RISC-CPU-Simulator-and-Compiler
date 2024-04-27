@@ -24,6 +24,7 @@ int main(int argc, char** argv) {
             cout << line << endl;
             lines.push_back(line);
         }
+        cout << endl;
         fp.close();
     }
 
