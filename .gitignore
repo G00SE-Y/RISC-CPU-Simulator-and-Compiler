@@ -1,4 +1,4 @@
 .vscode
 *.exe
 *.don
-/CPU.srcs
+CPU/CPU.sim
