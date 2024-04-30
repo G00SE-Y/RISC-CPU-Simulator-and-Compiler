@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     }
 
     string line;
-    std::vector<string> lines;
+    vector<string> lines;
 
     ifstream fp(argv[1]);
     if(fp.is_open()) {
@@ -26,11 +26,16 @@ int main(int argc, char** argv) {
         }
         cout << endl;
         fp.close();
+
+        auto t = Tokenizer::tokenize(lines);
+
+        cout << "------------" << endl <<"End of file! Bye-bye!" << endl;
+    }
+    else {
+        cout << "Unable to open file..." << endl;
     }
 
-    auto t = Tokenizer::tokenize(lines);
 
-    cout << "------------" << endl <<"End of file! Bye-bye!" << endl;
 
     return 0;
 }
