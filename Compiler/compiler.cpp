@@ -5,6 +5,7 @@
 
 #include "RISCV32I_ISA.h"
 #include "Tokenizer.h"
+#include "Parser.h"
 
 using namespace std;
 
@@ -26,16 +27,27 @@ int main(int argc, char** argv) {
         }
         cout << endl;
         fp.close();
-
+        cout << "------------" << endl <<"Now tokenizing..." << endl;
         auto t = Tokenizer::tokenize(lines);
+        cout << "------------" << endl <<"Now parsing and generating code..." << endl;
+        auto code = Parser::parse(t);
 
-        cout << "------------" << endl <<"End of file! Bye-bye!" << endl;
+        if(code.is_error) {
+            cout << "Error:" << endl << "\t";
+            cout << code.error;
+        }
+        else {
+            cout << "Successfully generated code!" << endl;
+            cout << code.output << endl;
+
+        }
+
     }
     else {
         cout << "Unable to open file..." << endl;
     }
 
-
+    cout << "\n\nSee ya!" << endl;
 
     return 0;
 }

@@ -9,21 +9,6 @@
 
 namespace Tokenizer {
 
-    /*
-    
-
-    OP:     
-
-    REG:    
-
-    IMM:    
-
-    SUBR:   
-
-    DATA:   
-
-    ADDR:   
-    */
     enum token_type {
         NO_TOKEN = 0, // Unidentified token and will result in a compiler error during parsing
         OPERATOR = 1, // An operation token that matches a predefined operation in the related *_ISA.h's enum
@@ -38,10 +23,17 @@ namespace Tokenizer {
 
     // Structure that describes a symbol in terms of what token definition it matches
     typedef struct Token {
-        token_type type =  NO_TOKEN;
+        Tokenizer::token_type type =  NO_TOKEN;
         BaseInt32_Instruction operation = NO_OP;
         std::string value = ""; // register identifier or numeric immediate
         std::string offset = "";
+
+        // this is only for slightly more convenient addition of definitions to the map
+        Token(Tokenizer::token_type t, BaseInt32_Instruction op) {
+            type = t;
+            operation = op;
+        }
+        Token() {} // TODO figure out why this needs to be here
     }token;
 
 
