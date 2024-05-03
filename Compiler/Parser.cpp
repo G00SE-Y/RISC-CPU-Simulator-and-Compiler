@@ -18,16 +18,7 @@ namespace Parser {
     namespace {
 
         Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator end);
-        bool verify_terminal(std::string type, Tokenizer::token tok);
-        std::string encode_RType(std::string opname, std::string rd, std::string rs1, std::string rs2);
-        std::string encode_IType(std::string opname, std::string rd, std::string rs1, std::string imm);
-        std::string encode_SType(std::string opname, std::string rs1, std::string rs2, std::string imm);
-        std::string encode_BType(std::string opname, std::string rs1, std::string rs2, std::string imm);
-        std::string encode_UType(std::string opname, std::string rd, std::string imm);
-        std::string encode_JType(std::string opname, std::string rd, std::string imm);
-
-
-        
+        bool verify_terminal(std::string type, Tokenizer::token tok);        
 
         Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator end) {
 
