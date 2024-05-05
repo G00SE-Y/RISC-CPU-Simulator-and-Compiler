@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 
 #include "Ins_Encoding_32I.h"
 #include "RISCV32I_ISA.h"
@@ -10,7 +11,14 @@ namespace Encode_32I {
     opcode   destination   funct3   source 1   source 2   funct7
     31-25       24-20      19-17     16-12      11-7       6-0
     */
-    std::string RType(std::string opname, std::string rd, std::string rs1, std::string rs2) {
+    std::string RType(std::vector<std::string> op) {
+
+        if(op.size() != 4) return "";
+
+        std::string opname = op[0];
+        std::string rd = op[1];
+        std::string rs1 = op[2];
+        std::string rs2 = op[3];
         
         std::string ins = "";
         std::string funct3 = "";
@@ -117,7 +125,14 @@ namespace Encode_32I {
     opcode   destination   funct3   source 1   imm[11:0]
     31-25       24-20      19-17     16-12         11-0
     */
-    std::string IType(std::string opname, std::string rd, std::string rs1, std::string imm) {
+    std::string IType(std::vector<std::string> op) {
+
+        if(op.size() != 4) return "";
+
+        std::string opname = op[0];
+        std::string rd = op[1];
+        std::string rs1 = op[2];
+        std::string imm = op[3];
 
         std::string ins = "";
         std::string funct3 = "";
@@ -202,7 +217,14 @@ namespace Encode_32I {
     opcode   imm[4:0]   funct3   source 1   source 2   imm[11:5]
     31-25     24-20      19-17    16-12      11-7        6-0
     */
-    std::string SType(std::string opname, std::string rs1, std::string rs2, std::string imm) {
+    std::string SType(std::vector<std::string> op) {
+
+        if(op.size() != 4) return "";
+
+        std::string opname = op[0];
+        std::string rs1 = op[1];
+        std::string rs2 = op[2];
+        std::string imm = op[3];
 
         std::string ins = "";
         std::string funct3 = "";
@@ -242,7 +264,14 @@ namespace Encode_32I {
     opcode   imm[11]   imm[4:1]   funct3   source 1   source 2   imm[10:5]   imm[12]
     31-25     24        23-20     19-17     16-12      11-7         6-1        0
     */
-    std::string BType(std::string opname, std::string rs1, std::string rs2, std::string imm) {
+    std::string BType(std::vector<std::string> op) {
+
+        if(op.size() != 4) return "";
+
+        std::string opname = op[0];
+        std::string rs1 = op[1];
+        std::string rs2 = op[2];
+        std::string imm = op[3];
 
         std::string ins = "";
         std::string funct3 = "";
@@ -297,7 +326,13 @@ namespace Encode_32I {
     opcode   destination   imm[31-12]
     31-25       24-20         19-0
     */
-    std::string UType(std::string opname, std::string rd, std::string imm) {
+    std::string UType(std::vector<std::string> op) {
+
+        if(op.size() != 3) return "";
+
+        std::string opname = op[0];
+        std::string rd = op[1];
+        std::string imm = op[2];
 
         std::string ins = "";
 
@@ -329,7 +364,13 @@ namespace Encode_32I {
     opcode   destination   imm[19:12]   imm[11]   imm[10:1]   imm[20]
     31-25       24-20        19-12         11       10-1         0
     */
-    std::string JType(std::string opname, std::string rd, std::string imm) {
+    std::string JType(std::vector<std::string> op) {
+        
+        if(op.size() != 3) return "";
+
+        std::string opname = op[0];
+        std::string rd = op[1];
+        std::string imm = op[2];
         
         std::string ins = "";
 
