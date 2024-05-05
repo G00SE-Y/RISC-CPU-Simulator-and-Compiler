@@ -33,6 +33,11 @@ namespace Tokenizer {
             type = t;
             operation = op;
         }
+        Token(Tokenizer::token_type t, std::string v) {
+            type = t;
+            operation = BaseInt32_Instruction::NO_OP;
+            value = v;
+        }
         Token() {} // TODO figure out why this needs to be here
     }token;
 
