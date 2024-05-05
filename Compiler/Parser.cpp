@@ -9,6 +9,8 @@
 #include "Tokenizer.h"
 #include "Ins_Encoding_32I.h"
 
+
+// thse 2 macros save 360 lines of code
 #define ADD_NEW_OPERATOR(name, NAME, type)                                              \
     Parser::definitions[#name] = Parser::Rule(                                          \
     Parser::definition_type::TERM,                                                      \
@@ -22,12 +24,19 @@
     );                                                                                  \
 
 
+#define OPERATOR_SWITCH(NAME, type)                                                     \
+    case NAME:                                                                          \
+    return parse_operation_switch(#NAME "_OP", Encode_32I::type, start, stop);          \
+
+
 
 namespace Parser {
 
     std::unordered_map<std::string, Parser::Rule> definitions;
+    std::unordered_map<std::string, std::string> registers;
 
     void init_definitions();
+    void init_registers();
     
     namespace {
 
@@ -43,6 +52,8 @@ namespace Parser {
         // functions for verifying that terminals are valid/formatting them
         std::string verify(std::string type, Tokenizer::token tok);
         std::string verify_register(std::string r);
+        std::string verify_immediate12(std::string imm);
+        std::string verify_immediate20(std::string imm);
 
         // used for NON-INFINITE recursive rule expansion
         std::vector<std::string> expand_rule_list(std::vector<std::string> rules);
@@ -52,7 +63,7 @@ namespace Parser {
 
 
         // all terminals currently only have lowercase names, so this works. Might be worth devolping a better convention // todo
-        const std::regex re_terminal("^[a-z]*$");
+        const std::regex re_terminal("^[a-z]*[0-9]{0,2}$");
         std::vector<std::string> expand_rule_list(std::vector<std::string> rules) {
             
             for(int i = 0; i < rules.size(); i++) {
@@ -73,8 +84,49 @@ namespace Parser {
 
 
         std::string verify(std::string type, Tokenizer::token tok) { // todo
-            return tok.value;
+
+            std::cout << type << " : " << tok.value << std::endl;
+
+            if(type == "register") return verify_register(tok.value);
+            else if(type == "immediate12") return verify_immediate12(tok.value);
+            else if(type == "immediate20") return verify_immediate20(tok.value);
+
+            else return tok.value;
         }
+
+
+        std::string verify_register(std::string r) {
+            std::cout << "register " << r << " became ";
+
+            try{
+                r = registers.at(r);
+            }
+            catch(std::out_of_range) {
+                return "";
+            }
+
+            std::cout << r << std::endl;
+            return r;
+        }
+
+
+        std::string verify_immediate12(std::string imm) {
+            // todo: this is not actually verifying anything
+            std::cout << "immediate " << imm << " became ";
+            imm.insert(imm.begin(), 12 - imm.size(), '0');
+            std::cout << imm << "(" << imm.size() << ")" << std::endl;
+            return imm;
+        }
+
+
+        std::string verify_immediate20(std::string imm) {
+            // todo: this is not actually verifying anything
+            std::cout << "immediate " << imm << " became ";
+            imm.insert(imm.begin(), 20 - imm.size(), '0');
+            std::cout << imm << "(" << imm.size() << ")" << std::endl;
+            return imm;
+        }
+
 
         Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::token>::iterator start, std::vector<Tokenizer::token>::iterator stop) {
             
@@ -106,7 +158,10 @@ namespace Parser {
             if(ret.output.size() != 0) return ret;
             else {
                 ret.is_error = true;
-                ret.error = "Invalid operands (error in validator?)";
+                ret.error = "Invalid operands for `" + rule_list[0] + "`:";
+                for(auto s: operands) {
+                    ret.error += " " + s; 
+                }
             }
             
             return ret;
@@ -116,7 +171,6 @@ namespace Parser {
         Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator stop) {
 
             Parser::Compiler_Return ret;
-
 
             // empty line, return
             if(start == stop) return ret;
@@ -130,14 +184,58 @@ namespace Parser {
 
                 switch((*start).operation) {
 
-                    case ADD:
+                    // all of these just call the operator switch function, but this makes my life easier and the code smaller
+                    OPERATOR_SWITCH(ADD, RType)
+                    OPERATOR_SWITCH(ADDI, IType)
+                    OPERATOR_SWITCH(AND, RType)
+                    OPERATOR_SWITCH(ANDI, IType)
+                    OPERATOR_SWITCH(AUIPC, UType)
+                    OPERATOR_SWITCH(BEQ, BType)
+                    OPERATOR_SWITCH(BGE, BType)
+                    OPERATOR_SWITCH(BGEU, BType)
+                    OPERATOR_SWITCH(BLT, BType)
+                    OPERATOR_SWITCH(BLTU, BType)
+                    OPERATOR_SWITCH(BNE, BType)
+                    OPERATOR_SWITCH(JAL, JType)
+                    OPERATOR_SWITCH(JALR, IType)
+                    OPERATOR_SWITCH(LB, IType)
+                    OPERATOR_SWITCH(LBU, IType)
+                    OPERATOR_SWITCH(LH, IType)
+                    OPERATOR_SWITCH(LHU, IType)
+                    OPERATOR_SWITCH(LUI, UType)
+                    OPERATOR_SWITCH(LW, IType)
+                    OPERATOR_SWITCH(OR, RType)
+                    OPERATOR_SWITCH(ORI, IType)
+                    OPERATOR_SWITCH(SB, SType)
+                    OPERATOR_SWITCH(SH, SType)
+                    OPERATOR_SWITCH(SLL, RType)
+                    OPERATOR_SWITCH(SLLI, IType)
+                    OPERATOR_SWITCH(SLT, RType)
+                    OPERATOR_SWITCH(SLTI, IType)
+                    OPERATOR_SWITCH(SLTU, RType)
+                    OPERATOR_SWITCH(SLTIU, IType)
+                    OPERATOR_SWITCH(SRA, RType)
+                    OPERATOR_SWITCH(SRAI, IType)
+                    OPERATOR_SWITCH(SRL, RType)
+                    OPERATOR_SWITCH(SRLI, IType)
+                    OPERATOR_SWITCH(SUB, RType)
+                    OPERATOR_SWITCH(SW, SType)
+                    OPERATOR_SWITCH(XOR, RType)
+                    OPERATOR_SWITCH(XORI, IType)
 
-                        return parse_operation_switch("ADD_OP", Encode_32I::RType, start, stop);
+                    case NOP:
+                        
+                        if(start + 1 == stop) { // nop takes no operands
+                            
+                            ret.output += Encode_32I::IType(std::vector<std::string>({"addi", "00000", "00000", "000000000000"}));
 
+                            if(ret.output.size() != 0) {
+                                ret.is_error = false;
+                                ret.error = "";
 
-                    case SUB:
-
-                        return parse_operation_switch("SUB_OP", Encode_32I::RType, start, stop);
+                                return ret;
+                            }
+                        }
 
                     default: // this should never be reached
                         std::cout << "Something broke in the parser (but the issue is probably in the tokenizer)  :'(" << std::endl; 
@@ -185,15 +283,38 @@ namespace Parser {
     Parser::Compiler_Return parse(std::vector<std::vector<Tokenizer::token>> tokens) {
 
         init_definitions();
+        init_registers();
 
-        Parser::Compiler_Return ret1 = parse_operation(tokens[0].begin(), tokens[0].end());
-        Parser::Compiler_Return ret2 = parse_operation(tokens[1].begin(), tokens[1].end());
+        Parser::Compiler_Return ret;
 
-        ret1.error += ret2.error;
-        ret1.is_error |= ret2.is_error;
-        ret1.output += ret2.output;
+        for(auto &line: tokens) {
 
-        return ret1;
+            for(int i = 0; i < line.size(); i++) { // convert all addresses into register, immediate
+                if(line[i].type == Tokenizer::token_type::ADDRESS) {
+                    line.insert(line.begin() + i, Tokenizer::Token(Tokenizer::token_type::REGISTER, line[i].offset));
+                    line[i + 1].type = Tokenizer::token_type::IMMEDIATE;
+                }
+            }
+
+            
+
+            Parser::Compiler_Return ret1 = parse_operation(line.begin(), line.end());
+            ret.error += ret1.error;
+            ret.is_error |= ret1.is_error;
+            ret.output += "\n" + ret1.output;
+
+            if(ret.is_error) break;
+        }
+
+
+        return ret;
+    }
+
+
+    void init_registers() {
+        Parser::registers["rd"] = "11111";
+        Parser::registers["r0"] = "00000";
+        Parser::registers["r1"] = "00001";
     }
 
 
@@ -220,16 +341,15 @@ namespace Parser {
             {}
         );
 
-        Parser::definitions["immediate"] = Parser::Rule(
+        Parser::definitions["immediate12"] = Parser::Rule(
             Parser::definition_type::TERM, 
             Tokenizer::Token(Tokenizer::token_type::IMMEDIATE, BaseInt32_Instruction::NO_OP), 
             {}
         );
 
-
-        Parser::definitions["address"] = Parser::Rule(
+        Parser::definitions["immediate20"] = Parser::Rule(
             Parser::definition_type::TERM, 
-            Tokenizer::Token(Tokenizer::token_type::ADDRESS, BaseInt32_Instruction::NO_OP), 
+            Tokenizer::Token(Tokenizer::token_type::IMMEDIATE, BaseInt32_Instruction::NO_OP), 
             {}
         );
 
@@ -244,31 +364,31 @@ namespace Parser {
         Parser::definitions["ITYPE_OPERANDS"] = Parser::Rule(
             Parser::definition_type::DEF, 
             Tokenizer::Token(), 
-            {"register", "register", "immediate"}
+            {"register", "register", "immediate12"}
         );
 
         Parser::definitions["STYPE_OPERANDS"] = Parser::Rule(
             Parser::definition_type::DEF, 
             Tokenizer::Token(), 
-            {"register", "register", "immediate"}
+            {"register", "register", "immediate12"}
         );
 
         Parser::definitions["BTYPE_OPERANDS"] = Parser::Rule(
             Parser::definition_type::DEF, 
             Tokenizer::Token(), 
-            {"register", "register", "immediate"}
+            {"register", "register", "immediate12"}
         );
 
         Parser::definitions["UTYPE_OPERANDS"] = Parser::Rule(
             Parser::definition_type::DEF, 
             Tokenizer::Token(), 
-            {"register", "immediate"}
+            {"register", "immediate20"}
         );
 
         Parser::definitions["JTYPE_OPERANDS"] = Parser::Rule(
             Parser::definition_type::DEF, 
             Tokenizer::Token(), 
-            {"register", "immediate"}
+            {"register", "immediate20"}
         );
 
         
@@ -309,15 +429,15 @@ namespace Parser {
         ADD_NEW_OPERATOR(sb, SB, S)
         ADD_NEW_OPERATOR(sh, SH, S)
         ADD_NEW_OPERATOR(sll, SLL, R)
-        ADD_NEW_OPERATOR(slli, SLLI, R)
+        ADD_NEW_OPERATOR(slli, SLLI, I)
         ADD_NEW_OPERATOR(slt, SLT, R)
         ADD_NEW_OPERATOR(slti, SLTI, I)
         ADD_NEW_OPERATOR(sltu, SLTU, R)
         ADD_NEW_OPERATOR(sltiu, SLTIU, I)
         ADD_NEW_OPERATOR(sra, SRA, R)
-        ADD_NEW_OPERATOR(srai, SRAI, R)
+        ADD_NEW_OPERATOR(srai, SRAI, I)
         ADD_NEW_OPERATOR(srl, SRL, R)
-        ADD_NEW_OPERATOR(srli, SRLI, R)
+        ADD_NEW_OPERATOR(srli, SRLI, I)
         ADD_NEW_OPERATOR(sub, SUB, R)
         ADD_NEW_OPERATOR(sw, SW, S)
         ADD_NEW_OPERATOR(xor, XOR, R)
