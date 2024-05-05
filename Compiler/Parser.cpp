@@ -2,21 +2,23 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
+#include <regex>
 
 #include "Parser.h"
 #include "RISCV32I_ISA.h"
 #include "Tokenizer.h"
+#include "Ins_Encoding_32I.h"
 
 #define ADD_NEW_OPERATOR(name, NAME, type)                                              \
-    Parser::definitions["name"] = Parser::Rule(                                         \
+    Parser::definitions[#name] = Parser::Rule(                                          \
     Parser::definition_type::TERM,                                                      \
     Tokenizer::Token(Tokenizer::token_type::OPERATOR, BaseInt32_Instruction::NAME),     \
         {}                                                                              \
     );                                                                                  \
-    Parser::definitions["NAME_OP"] = Parser::Rule(                                      \
+    Parser::definitions[#NAME "_OP"] = Parser::Rule(                                    \
         Parser::definition_type::DEF,                                                   \
         Tokenizer::Token(),                                                             \
-        {"name", "TYPE_OPERANDS"}                                                                \
+        {#name, #type "TYPE_OPERANDS"}                                                  \
     );                                                                                  \
 
 
@@ -26,94 +28,159 @@ namespace Parser {
     std::unordered_map<std::string, Parser::Rule> definitions;
 
     void init_definitions();
-
-
-
+    
     namespace {
 
-        Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator end);
-        bool verify_terminal(std::string type, Tokenizer::token tok);        
 
-        Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator end) {
+        // parse_operation only parses ONE operation!!!
+        Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator end);
+        // this function saves hundreds of lines of code... don't @ me
+        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<std::string>::iterator start, std::vector<std::string>::iterator stop);
+        
+        // functions for parsing terminals
+        std::string parse_regiser(Tokenizer::token);
+
+        // functions for verifying that terminals are valid/formatting them
+        std::string verify(std::string type, Tokenizer::token tok);
+        std::string verify_register(std::string r);
+
+        // used for NON-INFINITE recursive rule expansion
+        std::vector<std::string> expand_rule_list(std::vector<std::string> rules);
+
+        void pretty_print_definitions(); // debug Note: this will print a lot of text
+
+
+
+        // all terminals currently only have lowercase names, so this works. Might be worth devolping a better convention // todo
+        const std::regex re_terminal("^[a-z]*$");
+        std::vector<std::string> expand_rule_list(std::vector<std::string> rules) {
+            
+            for(int i = 0; i < rules.size(); i++) {
+                if(!std::regex_match(rules[i], re_terminal)) { // if it is expandable
+                    
+                    std::vector<std::string> new_rules = definitions[rules[i]].def;
+                    int tmp = i + 1;
+                    
+                    for(auto s: new_rules) {
+                        rules.insert(rules.begin() + tmp++, s);
+                    }
+                    rules.erase(rules.begin() + i);
+                }
+            }
+
+            return rules;
+        }
+
+
+        std::string verify(std::string type, Tokenizer::token tok) { // todo
+            return tok.value;
+        }
+
+        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::token>::iterator start, std::vector<Tokenizer::token>::iterator stop) {
+            
+            Parser::Compiler_Return ret;
+            ret.is_error = false;
+            ret.error = "";
+            ret.output = "";
+
+            std::vector<std::string> rule_list = expand_rule_list(definitions[rule_name].def);
+            std::string s;
+            std::vector<std::string> operands;
+
+            for(int i = 0; i < rule_list.size(); i++, start++) {
+                
+                if((s = verify(rule_list[i], *start)).size() == 0) { // if it isn't verified
+                    
+                    ret.is_error = true;
+                    ret.error = "Unrecognized symbol: `" + (*start).value +"`   Expected symbol of type '" + rule_list[i] +"'\n";
+                    ret.output = "";
+
+                    return ret;
+                }
+
+                operands.push_back(s);
+            }
+
+            ret.output = encoder(operands);
+
+            if(ret.output.size() != 0) return ret;
+            else {
+                ret.is_error = true;
+                ret.error = "Invalid operands (error in validator?)";
+            }
+            
+            return ret;
+        }
+
+
+        Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator stop) {
 
             Parser::Compiler_Return ret;
 
-            // empty line or file
-            if(start == end) {
-                ret.error = "Write some code, idiot!\n";
+
+            // empty line, return
+            if(start == stop) return ret;
+
+            
+            if((*start).type == Tokenizer::token_type::OPERATOR) {
+
+                std::vector<std::string> rule_list;
+                std::string s; // temp string for verification
+                std::vector<std::string> operands;
+
+                switch((*start).operation) {
+
+                    case ADD:
+
+                        return parse_operation_switch("ADD_OP", Encode_32I::RType, start, stop);
+
+
+                    case SUB:
+
+                        return parse_operation_switch("SUB_OP", Encode_32I::RType, start, stop);
+
+                    default: // this should never be reached
+                        std::cout << "Something broke in the parser (but the issue is probably in the tokenizer)  :'(" << std::endl; 
+                        ret.error = "Unrecognized operation: `" + (*start).value + "`";
+                        ret.is_error = true;
+                        ret.output = "";
+
+                        return ret;
+                }
+            }
+            else {
                 ret.is_error = true;
+                ret.error = "Unrecognized operation: `" + (*start).value +"`";
                 ret.output = "";
 
                 return ret;
             }
 
-            while(start != end) {
-                
-                if((*start).type == Tokenizer::token_type::OPERATOR) {
+        }
 
-                    std::vector<std::string> rule_list;
 
-                    switch((*start).operation) {
+        void pretty_print_definitions() {
 
-                        case ADD:
+            std::cout << "DEFINITIONS:" << std::endl;
+            auto it = definitions.begin();
+            while(it != definitions.end()) {
+                std::cout << (*it).first;
 
-                            // ret.output += "[add_opcode]";
+                if((*it).second.type == Parser::definition_type::TERM) std::cout << std::endl;
+                else {
 
-                            rule_list = Parser::definitions["ADD_OP"].def;
-
-                            for(int i = 0; i < rule_list.size(); i++, start++) {
-                                
-                                if(verify_terminal(rule_list[i], *start)) {
-                                    ret.output += "terminal(" + (*start).value + ") ";
-                                }
-                            }
-
-                            return ret;
-
-                        case SUB:
-
-                            ret.output += "[sub_opcode]";
-
-                            rule_list = Parser::definitions["SUB_OP"].def;
-
-                            for(int i = 0; i < rule_list.size(); i++, start++) {
-                                
-                                if(verify_terminal(rule_list[i], *start)) {
-                                    ret.output += "terminal(" + (*start).value + ") ";
-                                }
-                            }
-
-                            return ret;
-
-                        default:
-
-                            ret.error = "Some error occured in parsing `" + (*start).value + "` .";
-                            ret.is_error = true;
-
-                            return ret;// early stopping if error is found
+                    for(auto s: (*it).second.def) {
+                        std::cout << " " << s;
                     }
+                    std::cout << std::endl;
                 }
+                it++;
+
             }
-
-            return ret;
-
         }
-
-
-        bool verify_terminal(std::string type, Tokenizer::token tok) {
-
-            // std::cout << "verify(" << type << ", " << tok.value << ")" << std::endl;
-            
-            if(type == "register") {
-                // verify that it is a valid register
-                return true;
-            }
-
-            return false;
-        }
-
 
     }
+
 
     Parser::Compiler_Return parse(std::vector<std::vector<Tokenizer::token>> tokens) {
 

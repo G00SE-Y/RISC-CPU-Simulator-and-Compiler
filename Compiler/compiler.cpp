@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         auto code = Parser::parse(t);
 
         if(code.is_error) {
-            cout << "Error:" << endl << "\t";
+            cout << "Error: " << endl;
             cout << code.error;
         }
         else {
