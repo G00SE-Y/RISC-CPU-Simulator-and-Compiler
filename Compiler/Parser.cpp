@@ -109,20 +109,35 @@ namespace Parser {
             return r;
         }
 
-
+        const std::regex re_bin12bit("[0|1]{1,12}");
         std::string verify_immediate12(std::string imm) {
-            // todo: this is not actually verifying anything
+
+            if(std::regex_match(imm, re_bin12bit)) { // already binary
+
+                imm.insert(imm.begin(), 12 - imm.size(), '0');
+            }
+            else {
+                imm = imm.substr(imm.size() - 12, 12);
+            }
+
             std::cout << "immediate " << imm << " became ";
-            imm.insert(imm.begin(), 12 - imm.size(), '0');
             std::cout << imm << "(" << imm.size() << ")" << std::endl;
             return imm;
         }
 
 
+        const std::regex re_bin20bit("[0|1]{1,20}");
         std::string verify_immediate20(std::string imm) {
-            // todo: this is not actually verifying anything
+
+            if(std::regex_match(imm, re_bin20bit)) { // already binary
+
+                imm.insert(imm.begin(), 20 - imm.size(), '0');
+            }
+            else {
+                imm = imm.substr(imm.size() - 20, 20);
+            }
+
             std::cout << "immediate " << imm << " became ";
-            imm.insert(imm.begin(), 20 - imm.size(), '0');
             std::cout << imm << "(" << imm.size() << ")" << std::endl;
             return imm;
         }
