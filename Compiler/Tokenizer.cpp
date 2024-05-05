@@ -94,6 +94,7 @@ namespace Tokenizer {
             }
             else if((t.operation = is_op(s)) != BaseInt32_Instruction::NO_OP) { // if operation
                 t.type = Tokenizer::token_type::OPERATOR;
+                t.value = s; // useful for parsing later
             }
             else if((t.value = is_reg(s)) != "") { // if register 
                 t.type = Tokenizer::token_type::REGISTER;
