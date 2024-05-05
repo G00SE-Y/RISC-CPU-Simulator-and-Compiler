@@ -52,12 +52,6 @@ namespace Encode_32I {
                 funct7 += "___7___";
                 break;
 
-            case SLLI:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
-                break;
-
             case SLT:
                 ins += "__op___";
                 funct3 += "_3_";
@@ -75,20 +69,8 @@ namespace Encode_32I {
                 funct3 += "_3_";
                 funct7 += "___7___";
                 break;
-            
-            case SRAI:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
-                break;
 
             case SRL:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
-                break;
-
-            case SRLI:
                 ins += "__op___";
                 funct3 += "_3_";
                 funct7 += "___7___";
@@ -184,12 +166,27 @@ namespace Encode_32I {
                 funct3 += "_3_";
                 break;
 
+            case SLLI:
+                ins += "__op___";
+                funct3 += "_3_";
+                break;
+
             case SLTI:
                 ins += "__op___";
                 funct3 += "_3_";
                 break;
 
             case SLTIU:
+                ins += "__op___";
+                funct3 += "_3_";
+                break;
+
+            case SRAI:
+                ins += "__op___";
+                funct3 += "_3_";
+                break;
+
+            case SRLI:
                 ins += "__op___";
                 funct3 += "_3_";
                 break;
