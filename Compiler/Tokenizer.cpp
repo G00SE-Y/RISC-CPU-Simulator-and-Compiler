@@ -222,21 +222,14 @@ namespace Tokenizer {
 
         // this probably isn't good, but it really doesn't need to be
         std::string to_binary(std::string s) {
-            std::cout << s << "(base 10) -> ";
 
             std::string bin = "";
             uint32_t n = std::stoi(s);
 
-            std::cout << n << " -> ";
             for(int i = 0; i < 20; i++) {
                 bin = ((n & 1)? "1" : "0") + bin;
                 n = n >> 1;
-                std::cout << n << " -> ";
             }
-
-            // if(s[0] == '-') bin[0] = '1';
-
-            std::cout << bin << "(base 2)" << std::endl;
 
             return bin;
         }
