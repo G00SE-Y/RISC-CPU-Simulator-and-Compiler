@@ -3,6 +3,7 @@
 #include <regex>
 #include <sstream>
 #include <cstdint>
+#include <bitset>
 
 #include "Tokenizer.h"
 #include "RISCV32I_ISA.h"
@@ -223,15 +224,10 @@ namespace Tokenizer {
         // this probably isn't good, but it really doesn't need to be
         std::string to_binary(std::string s) {
 
-            std::string bin = "";
             uint32_t n = std::stoi(s);
+            std::bitset<20> bin(n);
 
-            for(int i = 0; i < 20; i++) {
-                bin = ((n & 1)? "1" : "0") + bin;
-                n = n >> 1;
-            }
-
-            return bin;
+            return bin.to_string();
         }
 
 
