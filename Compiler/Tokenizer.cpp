@@ -2,6 +2,7 @@
 #include <string>
 #include <regex>
 #include <sstream>
+#include <cstdint>
 
 #include "Tokenizer.h"
 #include "RISCV32I_ISA.h"
@@ -23,6 +24,7 @@ namespace Tokenizer {
         bool is_data_tag(std::string s); // Determines if the string is `.data`
         std::string is_address(std::string s); // Determines if the string is a memory location with an offset value
         bool is_comment(std::string s); // Determines if a comment has begun (comments end on a newline)
+        std::string to_binary(std::string s); // converts a string in base 10 to base 2
         void prettyPrintTokens(std::vector<std::vector<Tokenizer::token>> tokens); // Debug: prints all token data
 
 
@@ -149,14 +151,19 @@ namespace Tokenizer {
 
 
         /*
-        matches with a `-` or nothing followed by any sequence of 1 or more digits
+        Matches with a `-`, `0b` (binary encoding) or nothing followed by any sequence of 1 or more digits
+        By default, a prefixless immediate is assumed to be base 10 and will be converted to binary  
+        Binary encodings are signified by a `0b` prefix and any number of 0's or 1's.
+        All immediate values will be left padded or truncated (tkaing the right most bits) to fit the operation's expected immediate size
         */ 
-        const std::regex re_imm10("^-?[0-9]+$");
+        const std::regex re_imm("(^[-]?[0-9]+$)|(^0b[01]+$)");
 
         std::string is_imm(std::string s) {
 
-            if(std::regex_match(s, re_imm10)) return s;
-            else return "";
+            if(!std::regex_match(s, re_imm)) return ""; // doesn't match
+
+            if(s.substr(0, 2) == "0b") return s.substr(2);
+            else return to_binary(s);
         }
 
 
@@ -211,6 +218,29 @@ namespace Tokenizer {
             if(s[0] == '#') return true;
             else return false;
         }
+
+
+        // this probably isn't good, but it really doesn't need to be
+        std::string to_binary(std::string s) {
+            std::cout << s << "(base 10) -> ";
+
+            std::string bin = "";
+            uint32_t n = std::stoi(s);
+
+            std::cout << n << " -> ";
+            for(int i = 0; i < 20; i++) {
+                bin = ((n & 1)? "1" : "0") + bin;
+                n = n >> 1;
+                std::cout << n << " -> ";
+            }
+
+            // if(s[0] == '-') bin[0] = '1';
+
+            std::cout << bin << "(base 2)" << std::endl;
+
+            return bin;
+        }
+
 
     } // End of anonymous namespace
 
