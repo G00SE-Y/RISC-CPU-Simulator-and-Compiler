@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cstdint>
 #include <bitset>
+#include <unordered_map>
 
 #include "Tokenizer.h"
 #include "RISCV32I_ISA.h"
@@ -25,7 +26,8 @@ namespace Tokenizer {
         bool is_data_tag(std::string s); // Determines if the string is `.data`
         std::string is_address(std::string s); // Determines if the string is a memory location with an offset value
         bool is_comment(std::string s); // Determines if a comment has begun (comments end on a newline)
-        std::string to_binary(std::string s); // converts a string in base 10 to base 2
+        std::string dec_to_bin(std::string s); // converts a string in base 10 to base 2
+        std::string hex_to_bin(std::string s); // converts a string in base 16 to base 2
         void prettyPrintTokens(std::vector<std::vector<Tokenizer::token>> tokens); // Debug: prints all token data
 
 
@@ -157,14 +159,17 @@ namespace Tokenizer {
         Binary encodings are signified by a `0b` prefix and any number of 0's or 1's.
         All immediate values will be left padded or truncated (tkaing the right most bits) to fit the operation's expected immediate size
         */ 
-        const std::regex re_imm("(^[-]?[0-9]+$)|(^0b[01]+$)");
+        const std::regex re_imm("(^[-]?[0-9]+$)|(^(0(b|B))[01]+$)|(^0(x|X)[a-fA-F0-9]+$)");
 
         std::string is_imm(std::string s) {
 
             if(!std::regex_match(s, re_imm)) return ""; // doesn't match
 
-            if(s.substr(0, 2) == "0b") return s.substr(2);
-            else return to_binary(s);
+            std::string prefix = s.substr(0, 2);
+
+            if(prefix == "0b" || prefix == "0B") return s.substr(2); // already in binary
+            else if(prefix == "0x" || prefix == "0X") return hex_to_bin(s.substr(2)); // hex formatting
+            else return dec_to_bin(s); // decimal formatting
         }
 
 
@@ -221,13 +226,58 @@ namespace Tokenizer {
         }
 
 
-        // this probably isn't good, but it really doesn't need to be
-        std::string to_binary(std::string s) {
+        
+        std::string dec_to_bin(std::string s) {
 
             uint32_t n = std::stoi(s);
             std::bitset<20> bin(n);
 
             return bin.to_string();
+        }
+
+
+        // this is a little cheesy, but its quick and it works
+        const std::unordered_map<char, std::string> hex_byte_map {
+            {'0', "0000"},
+            {'1', "0001"},
+            {'2', "0010"},
+            {'3', "0011"},
+            {'4', "0100"},
+            {'5', "0101"},
+            {'6', "0110"},
+            {'7', "0111"},
+            {'8', "1000"},
+            {'9', "1001"},
+            {'A', "1010"},
+            {'a', "1010"},
+            {'B', "1011"},
+            {'b', "1011"},
+            {'C', "1100"},
+            {'c', "1100"},
+            {'D', "1101"},
+            {'d', "1101"},
+            {'E', "1110"},
+            {'e', "1110"},
+            {'F', "1111"},
+            {'f', "1111"},
+        };
+
+
+        std::string hex_to_bin(std::string s) {
+            std::string hex = "";
+            
+            // the only reason this try-catch is here is because the byte_map is const. I like it const, though... :)
+            try{
+
+                for(char c: s) {
+                    hex += hex_byte_map.at(c);
+                }
+            }
+            catch(std::out_of_range) {
+                std::cout << "how did we get here?" << std::endl;
+            }
+
+            return hex;
         }
 
 
