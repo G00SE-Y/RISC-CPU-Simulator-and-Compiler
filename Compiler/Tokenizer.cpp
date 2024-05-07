@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <bitset>
 #include <unordered_map>
+#include <iterator>
 
 #include "Tokenizer.h"
 #include "RISCV32I_ISA.h"
@@ -273,7 +274,7 @@ namespace Tokenizer {
                     hex += hex_byte_map.at(c);
                 }
             }
-            catch(std::out_of_range) {
+	    catch(std::out_of_range const&) {
                 std::cout << "how did we get here?" << std::endl;
             }
 
@@ -301,4 +302,3 @@ namespace Tokenizer {
         return tokens;    
     }
 }
-
