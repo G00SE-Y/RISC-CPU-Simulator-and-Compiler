@@ -1,6 +1,15 @@
 `timescale 1ns / 1ps
 /*
     By: Donovan Reynolds
+
+    This decoder will take a 32bit instructions and output the following values independently
+    Opcode
+    Destination Register
+    3 bit Function
+    Source Register 1
+    Source Register 2
+    7 bit Function
+    Immediate value (No sign extension just the required bits)
 */
 
 module Decoder(instruction,clk,opcode,destination,funct3,source1,source2,funct7,immediate);

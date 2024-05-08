@@ -3,18 +3,21 @@
     By: Donovan Reynolds
 */
 
-module Memory(
-
-    );
+module Memory();
 
     integer file;
 
-
+    integer i;
     
 
     initial begin
-        file = $fopen("C:/Users/Donovan/Desktop/GitHubRepo/RISC-Compiler/CPU/memory.txt","w");
-        $fwrite(file,"00000000000000000000000000000000");
+        file = $fopen("memory.txt","r");
+        if (file == 0) begin
+            file = $fopen("memory.txt","w");
+            for (i = 0; i < 256; i = i+1) begin
+                $fwrite(file,"mem%d      00000000000000000000000000000000\n",i);
+            end
+        end
         $fclose(file);
     end
 
