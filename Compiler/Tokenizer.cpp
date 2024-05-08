@@ -2,6 +2,9 @@
 #include <string>
 #include <regex>
 #include <sstream>
+#include <cstdint>
+#include <bitset>
+#include <unordered_map>
 
 #include "Tokenizer.h"
 #include "RISCV32I_ISA.h"
@@ -19,10 +22,12 @@ namespace Tokenizer {
         BaseInt32_Instruction is_op(std::string s); // Determines if the string is an operation and identify which operation
         std::string is_reg(std::string s); // Determines if the string is a register name
         std::string is_imm(std::string s); // Determines if the string is an immediate
-        std::string is_subroutine(std::string s); // Determines if the string is an subroutine tag
+        std::string is_label(std::string s); // Determines if the string is a label
         bool is_data_tag(std::string s); // Determines if the string is `.data`
         std::string is_address(std::string s); // Determines if the string is a memory location with an offset value
         bool is_comment(std::string s); // Determines if a comment has begun (comments end on a newline)
+        std::string dec_to_bin(std::string s); // converts a string in base 10 to base 2
+        std::string hex_to_bin(std::string s); // converts a string in base 16 to base 2
         void prettyPrintTokens(std::vector<std::vector<Tokenizer::token>> tokens); // Debug: prints all token data
 
 
@@ -35,28 +40,28 @@ namespace Tokenizer {
                 std::cout << "Line " << i++ << std::endl;
                 for(auto tok: line) {
 
-                    if(tok.type == token_type::NO_TOK) {
+                    if(tok.type == token_type::NO_TOKEN) {
                         std::cout << "Not a token" << std::endl;
                     }
-                    else if(tok.type == token_type::OP) {
+                    else if(tok.type == token_type::OPERATOR) {
                         std::cout << "Operation:\t" << tok.operation << std::endl;
                     }
-                    else if (tok.type == token_type::REG) {
+                    else if (tok.type == token_type::REGISTER) {
                         std::cout << "Register:\t" << tok.value << std::endl;
                     }
-                    else if (tok.type == token_type::IMM) {
+                    else if (tok.type == token_type::IMMEDIATE) {
                         std::cout << "Immediate:\t" << tok.value << std::endl;
                     }
-                    else if (tok.type == token_type::SUBR) {
+                    else if (tok.type == token_type::LABEL) {
                         std::cout << "Subroutine Tag: \t" << tok.value << std::endl;
                     }
                     else if (tok.type == token_type::DATA) {
                         std::cout << "Data Tag\t" << std::endl;
                     }
-                    else if (tok.type == token_type::ADDR) {
+                    else if (tok.type == token_type::ADDRESS) {
                         std::cout << "Address:\t" << tok.value << " + " << tok.offset << std::endl;
                     }
-                    else if (tok.type == token_type::COM) {
+                    else if (tok.type == token_type::COMMENT) {
                         std::cout << "Comment" << std::endl;
                     }
                 }
@@ -90,29 +95,30 @@ namespace Tokenizer {
 
             Tokenizer::token t;
             if(is_comment(s)) {
-                t.type = token_type::COM;
+                t.type = token_type::COMMENT;
             }
             else if((t.operation = is_op(s)) != BaseInt32_Instruction::NO_OP) { // if operation
-                t.type = Tokenizer::token_type::OP;
+                t.type = Tokenizer::token_type::OPERATOR;
+                t.value = s; // useful for parsing later
             }
             else if((t.value = is_reg(s)) != "") { // if register 
-                t.type = Tokenizer::token_type::REG;
+                t.type = Tokenizer::token_type::REGISTER;
             }
-            else if((t.value = is_subroutine(s)) != "") { // if subroutine
-                t.type = Tokenizer::token_type::SUBR;
+            else if((t.value = is_label(s)) != "") { // if subroutine
+                t.type = Tokenizer::token_type::LABEL;
             }
             else if(is_data_tag(s)) { // if data
                 t.type = Tokenizer::token_type::DATA;
             }
             else if((t.value = is_address(s)) != "") { // if address
-                t.type = Tokenizer::token_type::ADDR;
+                t.type = Tokenizer::token_type::ADDRESS;
                 std::string temp = t.value;
                 t.value = temp.substr(0, temp.find(" "));
                 t.offset = temp.substr(temp.find(" ") + 1);
 
             }
             else if((t.value = is_imm(s)) != "") { // if immediate
-                t.type = Tokenizer::token_type::IMM;
+                t.type = Tokenizer::token_type::IMMEDIATE;
             }
 
             return t;
@@ -148,14 +154,22 @@ namespace Tokenizer {
 
 
         /*
-        matches with a `-` or nothing followed by any sequence of 1 or more digits
+        Matches with a `-`, `0b` (binary encoding) or nothing followed by any sequence of 1 or more digits
+        By default, a prefixless immediate is assumed to be base 10 and will be converted to binary  
+        Binary encodings are signified by a `0b` prefix and any number of 0's or 1's.
+        All immediate values will be left padded or truncated (tkaing the right most bits) to fit the operation's expected immediate size
         */ 
-        const std::regex re_imm10("^-?[0-9]+$");
+        const std::regex re_imm("(^[-]?[0-9]+$)|(^(0(b|B))[01]+$)|(^0(x|X)[a-fA-F0-9]+$)");
 
         std::string is_imm(std::string s) {
 
-            if(std::regex_match(s, re_imm10)) return s;
-            else return "";
+            if(!std::regex_match(s, re_imm)) return ""; // doesn't match
+
+            std::string prefix = s.substr(0, 2);
+
+            if(prefix == "0b" || prefix == "0B") return s.substr(2); // already in binary
+            else if(prefix == "0x" || prefix == "0X") return hex_to_bin(s.substr(2)); // hex formatting
+            else return dec_to_bin(s); // decimal formatting
         }
 
 
@@ -163,11 +177,11 @@ namespace Tokenizer {
         Matches any alphanumeric string ending in a single `:` character
         e.g.) "loop:", "1:", "loop1:"
         */
-        const std::regex re_subroutine("^[a-zA-Z0-9][a-zA-Z0-9|_]*:$");
+        const std::regex re_label("^[a-zA-Z0-9][a-zA-Z0-9|_]*:$");
 
-        std::string is_subroutine(std::string s) {
+        std::string is_label(std::string s) {
 
-            if(std::regex_match(s, re_subroutine)) return s.substr(0, s.size() - 1);
+            if(std::regex_match(s, re_label)) return s;
             else return "";
         }
 
@@ -210,6 +224,62 @@ namespace Tokenizer {
             if(s[0] == '#') return true;
             else return false;
         }
+
+
+        
+        std::string dec_to_bin(std::string s) {
+
+            uint32_t n = std::stoi(s);
+            std::bitset<20> bin(n);
+
+            return bin.to_string();
+        }
+
+
+        // this is a little cheesy, but its quick and it works
+        const std::unordered_map<char, std::string> hex_byte_map {
+            {'0', "0000"},
+            {'1', "0001"},
+            {'2', "0010"},
+            {'3', "0011"},
+            {'4', "0100"},
+            {'5', "0101"},
+            {'6', "0110"},
+            {'7', "0111"},
+            {'8', "1000"},
+            {'9', "1001"},
+            {'A', "1010"},
+            {'a', "1010"},
+            {'B', "1011"},
+            {'b', "1011"},
+            {'C', "1100"},
+            {'c', "1100"},
+            {'D', "1101"},
+            {'d', "1101"},
+            {'E', "1110"},
+            {'e', "1110"},
+            {'F', "1111"},
+            {'f', "1111"},
+        };
+
+
+        std::string hex_to_bin(std::string s) {
+            std::string hex = "";
+            
+            // the only reason this try-catch is here is because the byte_map is const. I like it const, though... :)
+            try{
+
+                for(char c: s) {
+                    hex += hex_byte_map.at(c);
+                }
+            }
+            catch(std::out_of_range) {
+                std::cout << "how did we get here?" << std::endl;
+            }
+
+            return hex;
+        }
+
 
     } // End of anonymous namespace
 
