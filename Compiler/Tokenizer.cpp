@@ -273,7 +273,7 @@ namespace Tokenizer {
                     hex += hex_byte_map.at(c);
                 }
             }
-            catch(std::out_of_range) {
+            catch(std::out_of_range& e) {
                 std::cout << "how did we get here?" << std::endl;
             }
 

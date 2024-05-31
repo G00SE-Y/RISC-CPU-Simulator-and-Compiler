@@ -44,14 +44,12 @@ namespace Parser {
         // parse_operation only parses ONE operation!!!
         Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator end);
         // this function saves hundreds of lines of code... don't @ me
-        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<std::string>::iterator start, std::vector<std::string>::iterator stop);
+        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::token>::iterator start, std::vector<Tokenizer::token>::iterator stop);
         
-        // functions for parsing terminals
-        std::string parse_regiser(Tokenizer::token);
-
         // functions for verifying that terminals are valid/formatting them
         std::string verify(std::string type, Tokenizer::token tok);
         std::string verify_register(std::string r);
+        std::string verify_immediate5(std::string imm);
         std::string verify_immediate12(std::string imm);
         std::string verify_immediate20(std::string imm);
 
@@ -66,7 +64,7 @@ namespace Parser {
         const std::regex re_terminal("^[a-z]*[0-9]{0,2}$");
         std::vector<std::string> expand_rule_list(std::vector<std::string> rules) {
             
-            for(int i = 0; i < rules.size(); i++) {
+            for(std::size_t i = 0; i < rules.size(); i++) {
                 if(!std::regex_match(rules[i], re_terminal)) { // if it is expandable
                     
                     std::vector<std::string> new_rules = definitions[rules[i]].def;
@@ -88,6 +86,7 @@ namespace Parser {
             std::cout << type << " : " << tok.value << std::endl;
 
             if(type == "register") return verify_register(tok.value);
+            else if(type == "immediate5") return verify_immediate5(tok.value);
             else if(type == "immediate12") return verify_immediate12(tok.value);
             else if(type == "immediate20") return verify_immediate20(tok.value);
 
@@ -101,12 +100,28 @@ namespace Parser {
             try{
                 r = registers.at(r);
             }
-            catch(std::out_of_range) {
+            catch(std::out_of_range& e) {
                 return "";
             }
 
             std::cout << r << std::endl;
             return r;
+        }
+
+        const std::regex re_bin5bit("[0|1]{1,5}");
+        std::string verify_immediate5(std::string imm) {
+
+            if(std::regex_match(imm, re_bin5bit)) { // already binary
+
+                imm.insert(imm.begin(), 5 - imm.size(), '0');
+            }
+            else {
+                imm = imm.substr(imm.size() - 5, 5);
+            }
+
+            std::cout << "immediate " << imm << " became ";
+            std::cout << imm << "(" << imm.size() << ")" << std::endl;
+            return imm;
         }
 
         const std::regex re_bin12bit("[0|1]{1,12}");
@@ -143,6 +158,7 @@ namespace Parser {
         }
 
 
+
         Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::token>::iterator start, std::vector<Tokenizer::token>::iterator stop) {
             
             Parser::Compiler_Return ret;
@@ -154,7 +170,7 @@ namespace Parser {
             std::string s;
             std::vector<std::string> operands;
 
-            for(int i = 0; i < rule_list.size(); i++, start++) {
+            for(std::size_t i = 0; i < rule_list.size(); i++, start++) {
                 
                 if((s = verify(rule_list[i], *start)).size() == 0) { // if it isn't verified
                     
@@ -238,7 +254,7 @@ namespace Parser {
                     OPERATOR_SWITCH(XOR, RType)
                     OPERATOR_SWITCH(XORI, IType)
 
-                    case NOP:
+                    case NOP: // special case because NOP is just ADD with the pc and takes no operands
                         
                         if(start + 1 == stop) { // nop takes no operands
                             
@@ -304,7 +320,7 @@ namespace Parser {
 
         for(auto &line: tokens) {
 
-            for(int i = 0; i < line.size(); i++) { // convert all addresses into register, immediate
+            for(std::size_t i = 0; i < line.size(); i++) { // convert all addresses into register, immediate
                 if(line[i].type == Tokenizer::token_type::ADDRESS) {
                     line.insert(line.begin() + i, Tokenizer::Token(Tokenizer::token_type::REGISTER, line[i].offset));
                     line[i + 1].type = Tokenizer::token_type::IMMEDIATE;
@@ -368,6 +384,13 @@ namespace Parser {
             {}
         );
 
+        // this is a special case for SLLI, SRLI, and SRAI which have a 5-bit encoded shamt instead of the 12-bit immediate expected by their op type
+        Parser::definitions["immediate5"] = Parser::Rule(
+            Parser::definition_type::TERM, 
+            Tokenizer::Token(Tokenizer::token_type::IMMEDIATE, BaseInt32_Instruction::NO_OP), 
+            {}
+        );
+
 
         // operand types
         Parser::definitions["RTYPE_OPERANDS"] = Parser::Rule(
@@ -380,6 +403,12 @@ namespace Parser {
             Parser::definition_type::DEF, 
             Tokenizer::Token(), 
             {"register", "register", "immediate12"}
+        );
+
+        Parser::definitions["SHIFT_ITYPE_OPERANDS"] = Parser::Rule(
+            Parser::definition_type::DEF, 
+            Tokenizer::Token(), 
+            {"register", "register", "immediate5"}
         );
 
         Parser::definitions["STYPE_OPERANDS"] = Parser::Rule(
@@ -444,15 +473,15 @@ namespace Parser {
         ADD_NEW_OPERATOR(sb, SB, S)
         ADD_NEW_OPERATOR(sh, SH, S)
         ADD_NEW_OPERATOR(sll, SLL, R)
-        ADD_NEW_OPERATOR(slli, SLLI, I)
+        ADD_NEW_OPERATOR(slli, SLLI, SHIFT_I)
         ADD_NEW_OPERATOR(slt, SLT, R)
         ADD_NEW_OPERATOR(slti, SLTI, I)
         ADD_NEW_OPERATOR(sltu, SLTU, R)
         ADD_NEW_OPERATOR(sltiu, SLTIU, I)
         ADD_NEW_OPERATOR(sra, SRA, R)
-        ADD_NEW_OPERATOR(srai, SRAI, I)
+        ADD_NEW_OPERATOR(srai, SRAI, SHIFT_I)
         ADD_NEW_OPERATOR(srl, SRL, R)
-        ADD_NEW_OPERATOR(srli, SRLI, I)
+        ADD_NEW_OPERATOR(srli, SRLI, SHIFT_I)
         ADD_NEW_OPERATOR(sub, SUB, R)
         ADD_NEW_OPERATOR(sw, SW, S)
         ADD_NEW_OPERATOR(xor, XOR, R)
