@@ -297,7 +297,7 @@ namespace Encode_32I {
 
             case BGEU:
                 ins += "1100011";
-                funct3 += "_3_";
+                funct3 += "111";
                 break;
 
             case BLT:
