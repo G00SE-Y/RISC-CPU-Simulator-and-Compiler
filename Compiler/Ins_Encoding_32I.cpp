@@ -28,64 +28,64 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
             
             case ADD:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "000";
+                funct7 += "0000000";
 
                 break;
             
             case AND:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "111";
+                funct7 += "0000000";
                 break;
 
             case OR:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "110";
+                funct7 += "0000000";
                 break;
             
             case SLL:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "001";
+                funct7 += "0000000";
                 break;
 
             case SLT:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "010";
+                funct7 += "0000000";
                 break;
             
             case SLTU:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "011";
+                funct7 += "0000000";
                 break;
             
             case SRA:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "101";
+                funct7 += "0100000";
                 break;
 
             case SRL:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "101";
+                funct7 += "0000000";
                 break;
 
             case SUB:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "000";
+                funct7 += "0100000";
                 break;
 
             case XOR:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "100";
+                funct7 += "0000000";
                 break;
 
             default:
@@ -122,78 +122,78 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case ADDI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "000";
                 break;
 
             case ANDI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "111";
                 break;
 
             case JALR:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100111";
+                funct3 += "000";
                 break;
 
             case LB:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "000";
                 break;
 
             case LBU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "100";
                 break;
 
             case LH:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "001";
                 break;
 
             case LHU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "101";
                 break;
 
             case LW:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "010";
                 break;
 
             case ORI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "110";
                 break;
 
             case SLLI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "001";
                 break;
 
             case SLTI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "010";
                 break;
 
             case SLTIU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "011";
                 break;
 
             case SRAI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "101";
                 break;
 
             case SRLI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "101";
                 break;
 
             case XORI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "100";
                 break;
 
             default:
@@ -229,18 +229,18 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case SB:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0100011";
+                funct3 += "000";
                 break;
 
             case SH:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0100011";
+                funct3 += "001";
                 break;
 
             case SW:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0100011";
+                funct3 += "010";
                 break;
 
             default:
@@ -260,6 +260,8 @@ namespace Encode_32I {
 
     opcode   imm[11]   imm[4:1]   funct3   source 1   source 2   imm[10:5]   imm[12]
     31-25     24        23-20     19-17     16-12      11-7         6-1        0
+
+    All branch ops shown here have the same opcode: 1100011
     */
     std::string BType(std::vector<std::string> op) {
 
@@ -276,33 +278,33 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case BEQ:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "000";
                 break;
 
             case BGE:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "101";
                 break;
 
             case BGEU:
-                ins += "__op___";
+                ins += "1100011";
                 funct3 += "_3_";
                 break;
 
             case BLT:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "100";
                 break;
 
             case BLTU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "110";
                 break;
 
             case BNE:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "001";
                 break;
 
             default:
@@ -336,11 +338,11 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case AUIPC:
-                ins += "__op___";
+                ins += "0010111";
                 break;
 
             case LUI:
-                ins += "__op___";
+                ins += "0110111";
                 break;
 
             default:
@@ -374,7 +376,7 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case JAL:
-                ins += "__op___";
+                ins += "1101111";
                 break;
 
             default:
