@@ -17,9 +17,8 @@ namespace Parser {
     };
 
     typedef struct Compiler_Return {
-        bool is_error = false;
         std::string error = ""; // error message
-        std::string output = ""; // compiled code
+        std::vector<std::string> output; // compiled code
     }compRet;
 
     /*

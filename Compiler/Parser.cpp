@@ -162,9 +162,7 @@ namespace Parser {
         Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::token>::iterator start, std::vector<Tokenizer::token>::iterator stop) {
             
             Parser::Compiler_Return ret;
-            ret.is_error = false;
             ret.error = "";
-            ret.output = "";
 
             std::vector<std::string> rule_list = expand_rule_list(definitions[rule_name].def);
             std::string s;
@@ -174,9 +172,7 @@ namespace Parser {
                 
                 if((s = verify(rule_list[i], *start)).size() == 0) { // if it isn't verified
                     
-                    ret.is_error = true;
                     ret.error = "Unrecognized symbol: `" + (*start).value +"`   Expected symbol of type '" + rule_list[i] +"'\n";
-                    ret.output = "";
 
                     return ret;
                 }
@@ -184,11 +180,10 @@ namespace Parser {
                 operands.push_back(s);
             }
 
-            ret.output = encoder(operands);
+            ret.output.push_back(encoder(operands));
 
-            if(ret.output.size() != 0) return ret;
+            if(ret.output.back().size() != 0) return ret;
             else {
-                ret.is_error = true;
                 ret.error = "Invalid operands for `" + rule_list[0] + "`:";
                 for(auto s: operands) {
                     ret.error += " " + s; 
@@ -258,10 +253,9 @@ namespace Parser {
                         
                         if(start + 1 == stop) { // nop takes no operands
                             
-                            ret.output += Encode_32I::IType(std::vector<std::string>({"addi", "00000", "00000", "000000000000"}));
+                            ret.output.push_back(Encode_32I::IType(std::vector<std::string>({"addi", "00000", "00000", "000000000000"})));
 
-                            if(ret.output.size() != 0) {
-                                ret.is_error = false;
+                            if(ret.output.back().size() != 0) {
                                 ret.error = "";
 
                                 return ret;
@@ -271,16 +265,12 @@ namespace Parser {
                     default: // this should never be reached
                         std::cout << "Something broke in the parser (but the issue is probably in the tokenizer)  :'(" << std::endl; 
                         ret.error = "Unrecognized operation: `" + (*start).value + "`";
-                        ret.is_error = true;
-                        ret.output = "";
 
                         return ret;
                 }
             }
             else {
-                ret.is_error = true;
                 ret.error = "Unrecognized operation: `" + (*start).value +"`";
-                ret.output = "";
 
                 return ret;
             }
@@ -331,10 +321,9 @@ namespace Parser {
 
             Parser::Compiler_Return ret1 = parse_operation(line.begin(), line.end());
             ret.error += ret1.error;
-            ret.is_error |= ret1.is_error;
-            ret.output += "\n" + ret1.output;
+            ret.output.push_back(ret1.output[0]);
 
-            if(ret.is_error) break;
+            if(ret.error.size()) break;
         }
 
 
