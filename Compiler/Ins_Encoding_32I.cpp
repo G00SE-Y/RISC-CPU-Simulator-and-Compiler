@@ -111,13 +111,18 @@ namespace Encode_32I {
 
         if(op.size() != 4) return "";
 
+        /*
+        in SLLI, SRLI, and SRAI, `imm` will be a 5 bit encoded shamt instead of the normal 12 bit immediate and supplemented with a funct7 value
+        */
+
         std::string opname = op[0];
         std::string rd = op[1];
         std::string rs1 = op[2];
-        std::string imm = op[3];
+        std::string imm = op[3]; 
 
         std::string ins = "";
         std::string funct3 = "";
+        std::string funct7 = ""; // only used in shift logical ops
 
         switch(str_ins_BI32.at(opname)) {
 
@@ -169,6 +174,7 @@ namespace Encode_32I {
             case SLLI:
                 ins += "0010011";
                 funct3 += "001";
+                funct7 += "0000000";
                 break;
 
             case SLTI:
@@ -184,11 +190,13 @@ namespace Encode_32I {
             case SRAI:
                 ins += "0010011";
                 funct3 += "101";
+                funct7 += "0100000";
                 break;
 
             case SRLI:
                 ins += "0010011";
                 funct3 += "101";
+                funct7 += "0000000";
                 break;
 
             case XORI:
@@ -200,7 +208,7 @@ namespace Encode_32I {
                 return ins;
         }
     
-        ins += rd + funct3 + rs1 + imm;
+        ins += rd + funct3 + rs1 + imm + funct7;
 
         if(ins.size() == 32) return ins;
         else return "";
