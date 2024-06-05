@@ -33,46 +33,48 @@ J-type: opcode: 7   rd:5        imm[19:12]:8    imm[11]:1   imm[10:1]:10    imm[
 enum BaseInt32_Instruction {
 
                         //                                     Instruction format type     OP Codes
-        ADD =       0,  // Add                                          R-type              0110011
-        ADDI =      1,  // Add Immediate                                I-type              0010011
-        AND =       2,  // AND                                          R-type              0110011
-        ANDI =      3,  // AND Immediate                                I-type              0010011
-        AUIPC =     4,  // Add Upper Immediate Program Counter          U-type              0010111
-        BEQ =       5,  // Brach if Equal                               B-type              1100011
-        BGE =       6,  // Branch if Greater Than                       B-type              1100011
-        BGEU =      7,  // Branch if Greater Than Unsigned              B-type              1100011
-        BLT =       8,  // Branch if Less Than                          B-type              1100011
-        BLTU =      9,  // Branch if Less Than Unsigned                 B-type              1100011
-        BNE =       10, // Branch if Not Equal                          B-type              1100011
-        JAL =       11, // Jump and Link                                J-type              1101111
-        JALR =      12, // Jump and Link Register                       I-type              1100111
-        LB =        13, // Load Byte                                    I-type              0000011
-        LBU =       14, // Load Byte Unsigned                           I-type              0000011
-        LH =        15, // Load Halfword                                I-type              0000011
-        LHU =       16, // Load Halfword Unsigned                       I-type              0000011
-        LUI =       17, // Load Unsigned Immediate                      U-type              0110111
-        LW =        18, // Load Word                                    I-type              0000011
-        NOP =       19, // Incremement PC                               Immediate?          N/A
-        OR =        20, // OR                                           R-type              0110011
-        ORI =       21, // OR Immediate                                 I-type              0010011
-        SB =        22, // Store Byte                                   S-type              0100011
-        SH =        23, // Store Halfword                               S-type              0100011
-        SLL =       24, // Shift Left Logical                           R-type              0110011
-        SLLI =      25, // Shift Left Logical Immediate                 I-type              0010011
-        SLT =       26, // Set Less Than                                R-type              0110011
-        SLTI =      27, // Set Less Than Immediate                      I-type              0010011
-        SLTU =      28, // Set Less Than Unsigned                       R-type              0110011
-        SLTIU =     29, // Set Less Than Immediate Unsigned             I-type              0010011
-        SRA =       30, // Shift Right Arithmetic                       R-type              0110011
-        SRAI =      31, // Shift Right Arithmetic Immediate             I-type              0010011
-        SRL =       32, // Shift Right Logical                          R-type              0110011
-        SRLI =      33, // Shift Right Logic Immediate                  I-type              0010011
-        SUB =       34, // Subtract                                     R-type              0110011
-        SW =        35, // Store Word                                   S-type              0100011
-        XOR =       36, // XOR                                          R-type              0110011
-        XORI =      37, // XOR Immediate                                I-type              0010011
-        NO_OP =     38,
+        NO_OP,          // default value
 
+        ADD,            // Add                                          R-type              0110011
+        ADDI,           // Add Immediate                                I-type              0010011
+        AND,            // AND                                          R-type              0110011
+        ANDI,           // AND Immediate                                I-type              0010011
+        AUIPC,          // Add Upper Immediate Program Counter          U-type              0010111
+        BEQ,            // Brach if Equal                               B-type              1100011
+        BGE,            // Branch if Greater Than                       B-type              1100011
+        BGEU,           // Branch if Greater Than Unsigned              B-type              1100011
+        BLT,            // Branch if Less Than                          B-type              1100011
+        BLTU,           // Branch if Less Than Unsigned                 B-type              1100011
+        BNE,           // Branch if Not Equal                          B-type              1100011
+        JAL,            // Jump and Link                                J-type              1101111
+        JALR,           // Jump and Link Register                       I-type              1100111
+        LB,             // Load Byte                                    I-type              0000011
+        LBU,            // Load Byte Unsigned                           I-type              0000011
+        LH,             // Load Halfword                                I-type              0000011
+        LHU,            // Load Halfword Unsigned                       I-type              0000011
+        LUI,            // Load Unsigned Immediate                      U-type              0110111
+        LW,             // Load Word                                    I-type              0000011
+        NOP,            // Incremement PC                               Immediate?          N/A
+        OR,             // OR                                           R-type              0110011
+        ORI,            // OR Immediate                                 I-type              0010011
+        SB,             // Store Byte                                   S-type              0100011
+        SH,             // Store Halfword                               S-type              0100011
+        SLL,            // Shift Left Logical                           R-type              0110011
+        SLLI,           // Shift Left Logical Immediate                 I-type              0010011
+        SLT,            // Set Less Than                                R-type              0110011
+        SLTI,           // Set Less Than Immediate                      I-type              0010011
+        SLTU,           // Set Less Than Unsigned                       R-type              0110011
+        SLTIU,          // Set Less Than Immediate Unsigned             I-type              0010011
+        SRA,            // Shift Right Arithmetic                       R-type              0110011
+        SRAI,           // Shift Right Arithmetic Immediate             I-type              0010011
+        SRL,            // Shift Right Logical                          R-type              0110011
+        SRLI,           // Shift Right Logic Immediate                  I-type              0010011
+        SUB,            // Subtract                                     R-type              0110011
+        SW,             // Store Word                                   S-type              0100011
+        XOR,            // XOR                                          R-type              0110011
+        XORI,           // XOR Immediate                                I-type              0010011
+
+        SYSCALL,        // Performas a system call (only used for I/O currently)
 };
 
 /*
@@ -121,7 +123,7 @@ const std::unordered_map<std::string, BaseInt32_Instruction> str_ins_BI32 {
         {"sra",         BaseInt32_Instruction::SRA},
         {"or",          BaseInt32_Instruction::OR},
         {"and",         BaseInt32_Instruction::AND},
-
+        {"syscall",     BaseInt32_Instruction::SYSCALL},
 };
 
 #endif
