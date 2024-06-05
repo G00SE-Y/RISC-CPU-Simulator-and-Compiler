@@ -44,10 +44,10 @@ namespace Parser {
         // parse_operation only parses ONE operation!!!
         Parser::Compiler_Return parse_operation(std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator end);
         // this function saves hundreds of lines of code... don't @ me
-        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::token>::iterator start, std::vector<Tokenizer::token>::iterator stop);
+        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator stop);
         
         // functions for verifying that terminals are valid/formatting them
-        std::string verify(std::string type, Tokenizer::token tok);
+        std::string verify(std::string type, Tokenizer::Token tok);
         std::string verify_register(std::string r);
         std::string verify_immediate5(std::string imm);
         std::string verify_immediate12(std::string imm);
@@ -81,7 +81,7 @@ namespace Parser {
         }
 
 
-        std::string verify(std::string type, Tokenizer::token tok) { // todo
+        std::string verify(std::string type, Tokenizer::Token tok) { // todo
 
             std::cout << type << " : " << tok.value << std::endl;
 
@@ -159,7 +159,7 @@ namespace Parser {
 
 
 
-        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::token>::iterator start, std::vector<Tokenizer::token>::iterator stop) {
+        Parser::Compiler_Return parse_operation_switch(std::string rule_name, std::string encoder(std::vector<std::string>), std::vector<Tokenizer::Token>::iterator start, std::vector<Tokenizer::Token>::iterator stop) {
             
             Parser::Compiler_Return ret;
             ret.error = "";
@@ -301,7 +301,7 @@ namespace Parser {
     }
 
 
-    Parser::Compiler_Return parse(std::vector<std::vector<Tokenizer::token>> tokens) {
+    Parser::Compiler_Return parse(std::vector<std::vector<Tokenizer::Token>> tokens) {
 
         init_definitions();
         init_registers();
@@ -342,9 +342,9 @@ namespace Parser {
     void init_definitions() {
 
         // used for program blocks
-        Parser::definitions["label"] = Parser::Rule(
+        Parser::definitions["alias"] = Parser::Rule(
             Parser::definition_type::TERM, 
-            Tokenizer::Token(Tokenizer::token_type::LABEL, BaseInt32_Instruction::NO_OP), 
+            Tokenizer::Token(Tokenizer::token_type::ALIAS, BaseInt32_Instruction::NO_OP), 
             {}
         );
 

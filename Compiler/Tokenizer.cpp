@@ -16,24 +16,36 @@ namespace Tokenizer {
     namespace {
 
 
-        // Private Function Declarations
-        std::vector<Tokenizer::token> tokenize_line(std::string line); // Takes a single vector of string symbols and identifies them as tokens
-        Tokenizer::token identify_token(std::string s); // Identifies a string as a token
+        //* ------------------- Private Function Declarations ------------------- *//
+
+        std::vector<Tokenizer::Token> tokenize_line(std::string line); // Takes a single vector of string symbols and identifies them as tokens
+        std::string dec_to_bin(std::string s); // converts a string in base 10 to base 2
+        std::string hex_to_bin(std::string s); // converts a string in base 16 to base 2
+
+        // functions used for identifying tokens
+        Tokenizer::Token identify_token(std::string s); // Identifies a string as a token
+        std::string is_address(std::string s); // Determines if the string is a memory location with an offset value
         BaseInt32_Instruction is_op(std::string s); // Determines if the string is an operation and identify which operation
         std::string is_reg(std::string s); // Determines if the string is a register name
         std::string is_imm(std::string s); // Determines if the string is an immediate
-        std::string is_label(std::string s); // Determines if the string is a label
-        bool is_data_tag(std::string s); // Determines if the string is `.data`
-        std::string is_address(std::string s); // Determines if the string is a memory location with an offset value
-        bool is_comment(std::string s); // Determines if a comment has begun (comments end on a newline)
-        std::string dec_to_bin(std::string s); // converts a string in base 10 to base 2
-        std::string hex_to_bin(std::string s); // converts a string in base 16 to base 2
-        void prettyPrintTokens(std::vector<std::vector<Tokenizer::token>> tokens); // Debug: prints all token data
+        std::string is_alias(std::string s); // Determines if the string is an alias
+        
+        bool is_comment(std::string s); // Determines if a comment has begun with `#` (comments end on a newline)
+        bool is_text_directive(std::string s); // Determines if the string is `.text`
+        bool is_data_directive(std::string s); // Determines if the string is `.data`
+        bool is_word_directive(std::string s); // Determines if the string is `.word`
+        bool is_half_directive(std::string s); // Determines if the string is `.half`
+        bool is_ascii_directive(std::string s); // Determines if the string is `.ascii`
+        bool is_asciiz_directive(std::string s); // Determines if the string is `.asciiz`
+        bool is_reserve_directive(std::string s); // Determines if the string is `.reserve`
+
+        void prettyPrintTokens(std::vector<std::vector<Tokenizer::Token>> tokens); // todo: Debug: prints all token data
 
 
-        // Function Definitions
 
-        void prettyPrintTokens(std::vector<std::vector<Tokenizer::token>> tokens) {
+        //* ------------------- Function Definitions ------------------- *//
+
+        void prettyPrintTokens(std::vector<std::vector<Tokenizer::Token>> tokens) { 
 
             int i = 1;
             for(auto line: tokens) {
@@ -52,11 +64,11 @@ namespace Tokenizer {
                     else if (tok.type == token_type::IMMEDIATE) {
                         std::cout << "Immediate:\t" << tok.value << std::endl;
                     }
-                    else if (tok.type == token_type::LABEL) {
-                        std::cout << "Subroutine Tag: \t" << tok.value << std::endl;
+                    else if (tok.type == token_type::ALIAS) {
+                        std::cout << "Alias: \t" << tok.value << std::endl;
                     }
                     else if (tok.type == token_type::DATA) {
-                        std::cout << "Data Tag\t" << std::endl;
+                        std::cout << "Data directive\t" << std::endl;
                     }
                     else if (tok.type == token_type::ADDRESS) {
                         std::cout << "Address:\t" << tok.value << " + " << tok.offset << std::endl;
@@ -70,9 +82,9 @@ namespace Tokenizer {
         }
 
 
-        std::vector<Tokenizer::token> tokenize_line(std::string line) {
+        std::vector<Tokenizer::Token> tokenize_line(std::string line) {
 
-            std::vector<Tokenizer::token> tokens;
+            std::vector<Tokenizer::Token> tokens;
             std::vector<std::string> symbols;
 
             // split line by whitespace and copy into symbols
@@ -82,8 +94,12 @@ namespace Tokenizer {
                 std::back_inserter(symbols)
             );
 
-            for(auto symbol: symbols) {
+            for(auto& symbol: symbols) {
                 tokens.push_back(identify_token(symbol));
+                if(tokens.back().type == Tokenizer::token_type::COMMENT) {
+                    tokens.pop_back();
+                    break;
+                }
             }
 
             return tokens;
@@ -91,41 +107,62 @@ namespace Tokenizer {
 
 
 
-        Tokenizer::token identify_token(std::string s) {
+        Tokenizer::Token identify_token(std::string s) {
 
-            Tokenizer::token t;
-            if(is_comment(s)) {
+            Tokenizer::Token t;
+            if(is_comment(s)) { // todo: handle comments properly
                 t.type = token_type::COMMENT;
             }
             else if((t.operation = is_op(s)) != BaseInt32_Instruction::NO_OP) { // if operation
                 t.type = Tokenizer::token_type::OPERATOR;
                 t.value = s; // useful for parsing later
             }
-            else if((t.value = is_reg(s)) != "") { // if register 
+            else if((t.value = is_reg(s)) != "") {
                 t.type = Tokenizer::token_type::REGISTER;
             }
-            else if((t.value = is_label(s)) != "") { // if subroutine
-                t.type = Tokenizer::token_type::LABEL;
-            }
-            else if(is_data_tag(s)) { // if data
-                t.type = Tokenizer::token_type::DATA;
-            }
-            else if((t.value = is_address(s)) != "") { // if address
+            else if((t.value = is_address(s)) != "") {
                 t.type = Tokenizer::token_type::ADDRESS;
                 std::string temp = t.value;
                 t.value = temp.substr(0, temp.find(" "));
                 t.offset = temp.substr(temp.find(" ") + 1);
-
             }
-            else if((t.value = is_imm(s)) != "") { // if immediate
+            else if((t.value = is_imm(s)) != "") {
                 t.type = Tokenizer::token_type::IMMEDIATE;
+            }
+            else if((t.value = is_alias(s)) != "") {
+                t.type = Tokenizer::token_type::ALIAS;
+            }
+            else if(is_text_directive(s)) {
+                t.type = Tokenizer::token_type::TEXT;
+            }
+            else if(is_data_directive(s)) {
+                t.type = Tokenizer::token_type::DATA;
+            }
+            else if(is_word_directive(s)) {
+                t.type = Tokenizer::token_type::WORD;
+            }
+            else if(is_half_directive(s)) {
+                t.type = Tokenizer::token_type::HALF;
+            }
+            else if(is_ascii_directive(s)) {
+                t.type = Tokenizer::token_type::ASCII;
+            }
+            else if(is_asciiz_directive(s)) {
+                t.type = Tokenizer::token_type::ASCIIZ;
+            }
+            else if(is_reserve_directive(s)) {
+                t.type = Tokenizer::token_type::RESERVE;
             }
 
             return t;
         }
 
 
-
+        //* -------------- Code section tokens -------------- *//
+        
+        /*
+        Matches any operation in the ISA
+        */
         BaseInt32_Instruction is_op(std::string s) {
 
             try {
@@ -135,7 +172,6 @@ namespace Tokenizer {
                 return BaseInt32_Instruction::NO_OP;
             }
         }
-
 
         /*
         matches any string that consists of a `$`, then has a lowercase letter and a digit in that order
@@ -174,31 +210,6 @@ namespace Tokenizer {
 
 
         /*
-        Matches any alphanumeric string ending in a single `:` character
-        e.g.) "loop:", "1:", "loop1:"
-        */
-        const std::regex re_label("^[a-zA-Z0-9][a-zA-Z0-9|_]*:$");
-
-        std::string is_label(std::string s) {
-
-            if(std::regex_match(s, re_label)) return s;
-            else return "";
-        }
-
-
-        /*
-        Matches `.data` exactly
-        */
-        const std::regex re_data_tag("^\\.data$");
-
-        bool is_data_tag(std::string s) {
-
-            if(std::regex_match(s, re_data_tag)) return true;
-            else return false;
-        }
-
-
-        /*
         Matches a numeric string followed by `($`, a register name, then `)`
         */
         const std::regex re_addr("^[0-9]+\\(\\$[a-z]+[0-9]{0,2}\\)$");
@@ -216,6 +227,116 @@ namespace Tokenizer {
             else return "";
         }
 
+
+
+
+        //* -------------- Other Tokens -------------- *//
+
+
+        /*
+        Matches any alphanumeric string that can contain `_` after the frist character ending in a single `:`
+        e.g.) "loop:", "1:", "loop1:", "1loop:"
+        */
+        const std::regex re_alias("^[a-zA-Z0-9][a-zA-Z0-9|_]*:$");
+
+        std::string is_alias(std::string s) {
+
+            if(std::regex_match(s, re_alias)) return s;
+            else return "";
+        }
+
+
+        /*
+        Matches `.text` exactly
+        */
+        const std::regex re_text_directive("^\\.text$");
+
+        bool is_text_directive(std::string s) {
+
+            if(std::regex_match(s, re_text_directive)) return true;
+            else return false;
+        }
+
+
+
+        /*
+        Matches `.data` exactly
+        */
+        const std::regex re_data_directive("^\\.data$");
+
+        bool is_data_directive(std::string s) {
+
+            if(std::regex_match(s, re_data_directive)) return true;
+            else return false;
+        }
+
+
+
+        /*
+        Matches `.word` exactly
+        */
+        const std::regex re_word_directive("^\\.word$");
+
+        bool is_word_directive(std::string s) {
+
+            if(std::regex_match(s, re_word_directive)) return true;
+            else return false;
+        }
+
+
+
+        /*
+        Matches `.half` exactly
+        */
+        const std::regex re_half_directive("^\\.half$");
+
+        bool is_half_directive(std::string s) {
+
+            if(std::regex_match(s, re_half_directive)) return true;
+            else return false;
+        }
+
+
+
+        /*
+        Matches `.ascii` exactly
+        */
+        const std::regex re_ascii_directive("^\\.ascii$");
+
+        bool is_ascii_directive(std::string s) {
+
+            if(std::regex_match(s, re_ascii_directive)) return true;
+            else return false;
+        }
+
+
+
+        /*
+        Matches `.asciiz` exactly
+        */
+        const std::regex re_asciiz_directive("^\\.asciiz$");
+
+        bool is_asciiz_directive(std::string s) {
+
+            if(std::regex_match(s, re_asciiz_directive)) return true;
+            else return false;
+        }
+
+
+
+        /*
+        Matches `.reserve` exactly
+        */
+        const std::regex re_reserve_directive("^\\.reserve$");
+
+        bool is_reserve_directive(std::string s) {
+
+            if(std::regex_match(s, re_reserve_directive)) return true;
+            else return false;
+        }
+
+
+
         /*
         Matches anything that is or starts with `#`
         */
@@ -226,6 +347,8 @@ namespace Tokenizer {
         }
 
 
+
+        //* -------------- Other Functions -------------- *//
         
         std::string dec_to_bin(std::string s) {
 
@@ -287,9 +410,9 @@ namespace Tokenizer {
     /*
     Takes a vector of strings in ASM and converts it into a vector of identified tokens
     */
-    std::vector<std::vector<Tokenizer::token>> tokenize(std::vector<std::string> code) {
+    std::vector<std::vector<Tokenizer::Token>> tokenize(std::vector<std::string> code) {
 
-        std::vector<std::vector<Tokenizer::token>> tokens;
+        std::vector<std::vector<Tokenizer::Token>> tokens;
 
         for(auto line: code) {
 
