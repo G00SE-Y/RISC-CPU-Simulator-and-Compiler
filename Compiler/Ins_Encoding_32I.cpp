@@ -8,8 +8,10 @@ namespace Encode_32I {
 
     /*
     R-type breakdown
-    opcode   destination   funct3   source 1   source 2   funct7
-    31-25       24-20      19-17     16-12      11-7       6-0
+
+                    funct7   rs1     rs2    funct3   rd     opcode
+    bits:           31-25   24-20   19-15   14-12   11-7     6-0
+    string index:    0-6    7-11    12-16   17-19   20-24   25-31
     */
     std::string RType(std::vector<std::string> op) {
 
@@ -100,11 +102,11 @@ namespace Encode_32I {
 
 
     /*
-    I-type breakdown
-    12-bit immediate
+    I-type breakdown (12-bit immediate)
 
-    opcode   destination   funct3   source 1   imm[11:0]
-    31-25       24-20      19-17     16-12         11-0
+                    imm      rs1    funct3   rd     opcode
+    bits:           31-20   19-15   14-12   11-7     6-0
+    string index:   0-11    12-16   17-19   20-24   25-31
     */
     std::string IType(std::vector<std::string> op) {
 
@@ -215,11 +217,11 @@ namespace Encode_32I {
 
 
     /*
-    S-type breakdown
-    12-bit immediate
+    S-type breakdown (12-bit immediate)
 
-    opcode   imm[4:0]   funct3   source 1   source 2   imm[11:5]
-    31-25     24-20      19-17    16-12      11-7        6-0
+                    imm[11:5]   rs2     rs1    funct3   imm[4:0]   opcode
+    bits:           31-25      24-20   19-15   14-12     11-7       6-0
+    string index:   0-6        7-11    12-16   17-19     20-24     25-31
     */
     std::string SType(std::vector<std::string> op) {
 
@@ -262,13 +264,11 @@ namespace Encode_32I {
 
 
     /*
-    B-type breakdown
-    12-bit immediate
+    B-type breakdown (12-bit immediate)
 
-    opcode   imm[11]   imm[4:1]   funct3   source 1   source 2   imm[10:5]   imm[12]
-    31-25     24        23-20     19-17     16-12      11-7         6-1        0
-
-    All branch ops shown here have the same opcode: 1100011
+                    imm[12]  imm[10:5]  rs2     rs1    funct3  imm[4:1]  imm[11]  opcode
+    bits:              31      30-25   24-20   19-15   14-12     11-8      7       6-0 
+    string index:      0        1-6    7-11    12-16   17-19     20-23     24     25-31
     */
     std::string BType(std::vector<std::string> op) {
 
@@ -326,11 +326,11 @@ namespace Encode_32I {
 
 
     /*
-    U-type breakdown
-    20-bit immediate
+    U-type breakdown (20-bit immediate)
 
-    opcode   destination   imm[31-12]
-    31-25       24-20         19-0
+                    imm[31:12]   rd     opcode
+    bits:             31-12     12-7     6-0
+    string index:      0-19     20-24   25-31
     */
     std::string UType(std::vector<std::string> op) {
 
@@ -364,11 +364,11 @@ namespace Encode_32I {
 
 
     /*
-    J-type breakdown
-    20-bit immediate
-    
-    opcode   destination   imm[19:12]   imm[11]   imm[10:1]   imm[20]
-    31-25       24-20        19-12         11       10-1         0
+    J-type breakdown (20-bit immediate)
+
+                    imm[20]  imm[10:1]  imm[11]  imm[19:12]  rd     opcode
+    bits:              31      30-21      20       19-12    11-7     6-0
+    string index:      0       1-10       11       12-19    20-24   25-31
     */
     std::string JType(std::vector<std::string> op) {
         
