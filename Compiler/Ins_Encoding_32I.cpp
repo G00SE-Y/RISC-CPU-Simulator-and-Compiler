@@ -91,11 +91,10 @@ namespace Encode_32I {
             default:
                 return ins;
         }
-    
-        
-        ins += rd + funct3 + rs1 + rs2 + funct7;
 
-        if(ins.size() == 32) return ins;
+        std::string s = funct7 + rs2 + rs1 + funct3 + rd + ins;
+
+        if(s.size() == 32) return s;
         else return "";
     }
 
@@ -208,9 +207,9 @@ namespace Encode_32I {
                 return ins;
         }
     
-        ins += rd + funct3 + rs1 + imm + funct7;
+        std::string s = funct7 + imm + rs1 + funct3 + rd + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
@@ -255,9 +254,9 @@ namespace Encode_32I {
                 return ins; 
         }
 
-        ins += imm.substr(7, 5) + funct3 + rs1 + rs2 + imm.substr(0, 7);
+        std::string s = imm.substr(0, 7) + rs2 + rs1 + funct3 + imm.substr(7, 5) + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
@@ -319,9 +318,9 @@ namespace Encode_32I {
                 return ins;
         }
     
-        ins += imm.substr(1, 1) + imm.substr(7, 4) + funct3 + rs1 + rs2 + imm.substr(1, 6) + imm.substr(0, 1);
+        std::string s = imm.substr(0, 1) + imm.substr(1, 6) + rs2 + rs1 + funct3 + imm.substr(7, 4) + imm.substr(1, 1) + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
@@ -357,9 +356,9 @@ namespace Encode_32I {
                 return ins;
         }
 
-        ins += rd + imm;
+        std::string s = imm + rd + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
@@ -391,9 +390,9 @@ namespace Encode_32I {
                 return ins;
         }
 
-        ins += rd + imm.substr(1, 19) + imm.substr(0, 1);
+        std::string s = imm[0] + imm.substr(10, 10) + imm[9] + imm.substr(1, 8) + rd + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 }
