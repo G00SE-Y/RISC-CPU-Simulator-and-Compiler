@@ -33,6 +33,10 @@ assign funct3 = instruction[14:12];
 assign source1 = instruction[19:15];
 assign source2 = instruction[24:20];
 assign funct7 = instruction[31:25];
+
+
+
+
 assign immediate = internalImm;
 
 

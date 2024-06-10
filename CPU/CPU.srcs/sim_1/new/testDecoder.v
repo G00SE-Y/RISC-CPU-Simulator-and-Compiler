@@ -11,8 +11,7 @@ initial clk = 0;
 always #1 clk = ~clk;
 
 reg [31:0] instruction;
-initial instruction = 12345678;
-always @(negedge clk) instruction = instruction + 1;
+initial instruction = 32'b00000000000000000000111111100100;
 
 wire [6:0] opcode;
 wire [4:0] destination;

@@ -38,6 +38,9 @@ assign result = internalResult;
 
 
 always @(posedge clk) begin
+
+    if (immediate[11] == 1) signExtend <= 4294963200 + immediate;
+    else signExtend <= immediate;    
     /*
     opcode 0110011 used for ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR,  AND
     funct3:                 000, 000, 001, 010, 011,  100, 101, 101, 110, 111
@@ -73,9 +76,6 @@ always @(posedge clk) begin
     */
     
     if (opcode == 7'b0010011)begin
-        
-        if (immediate[11] == 1) signExtend <= 4294963200 + immediate;
-        else signExtend <= immediate;
 
 
         case (funct3)
@@ -105,23 +105,34 @@ always @(posedge clk) begin
 */
     if (opcode == 7'b1100011)begin
         case (funct3)
-        0: internalResult <= (source1 == source2) ? immediate : 0;
-        1: internalResult <= (source1 != source2) ? immediate : 0;
+        0: internalResult <= (source1 == source2) ? signExtend : 0;
+        1: internalResult <= (source1 != source2) ? signExtend : 0;
         4: begin 
-            if (source1[31] == 1 && source2[31] == 0) internalResult <= immediate;
+            if (source1[31] == 1 && source2[31] == 0) internalResult <= signExtend;
             else if (source1[31] == 0 && source2[31] == 1) internalResult <= 0;
-            else internalResult <= (source1<source2) ? immediate : 0;
+            else internalResult <= (source1<source2) ? signExtend : 0;
         end
         5: begin 
             if (source1[31] == 1 && source2[31] == 0) internalResult <= 0;
-            else if (source1[31] == 0 && source2[31] == 1) internalResult <= immediate;
-            else internalResult <= (source1<source2) ? 0 : immediate;
+            else if (source1[31] == 0 && source2[31] == 1) internalResult <= signExtend;
+            else internalResult <= (source1<source2) ? 0 : signExtend;
         end
-        6: internalResult <= (source1 < source2) ? immediate : 0;
-        7: internalResult <= (source1 < source2) ? 0 : immediate;
+        6: internalResult <= (source1 < source2) ? signExtend : 0;
+        7: internalResult <= (source1 < source2) ? 0 : signExtend;
         default internalResult <= 0;
         endcase
     end
+
+    if (opcode == 7'b0100011) internalResult <= source1 + signExtend;
+
+    // JALR
+    if (opcode == 7'b1100111) internalResult <= source1 + signExtend;
+    // JAL
+    if (opcode == 7'b1101111) begin 
+        if(immediate[20] == 1) internalResult <= source1 - immediate;
+        else internalResult <= source1 + immediate;
+    end
+    
     
 end
 
