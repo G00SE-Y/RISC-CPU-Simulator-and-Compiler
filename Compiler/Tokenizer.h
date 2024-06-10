@@ -54,7 +54,7 @@ namespace Tokenizer {
             value = v;
         }
         Token() {}
-    };
+    }Token;
 
     // returns a vector of identified tokens in the same line order as the given argument vector
     std::vector<std::vector<Tokenizer::Token>> tokenize(std::vector<std::string> code);
