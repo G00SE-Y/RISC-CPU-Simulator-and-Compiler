@@ -8,8 +8,10 @@ namespace Encode_32I {
 
     /*
     R-type breakdown
-    opcode   destination   funct3   source 1   source 2   funct7
-    31-25       24-20      19-17     16-12      11-7       6-0
+
+                    funct7   rs1     rs2    funct3   rd     opcode
+    bits:           31-25   24-20   19-15   14-12   11-7     6-0
+    string index:    0-6    7-11    12-16   17-19   20-24   25-31
     */
     std::string RType(std::vector<std::string> op) {
 
@@ -28,191 +30,198 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
             
             case ADD:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "000";
+                funct7 += "0000000";
 
                 break;
             
             case AND:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "111";
+                funct7 += "0000000";
                 break;
 
             case OR:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "110";
+                funct7 += "0000000";
                 break;
             
             case SLL:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "001";
+                funct7 += "0000000";
                 break;
 
             case SLT:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "010";
+                funct7 += "0000000";
                 break;
             
             case SLTU:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "011";
+                funct7 += "0000000";
                 break;
             
             case SRA:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "101";
+                funct7 += "0100000";
                 break;
 
             case SRL:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "101";
+                funct7 += "0000000";
                 break;
 
             case SUB:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "000";
+                funct7 += "0100000";
                 break;
 
             case XOR:
-                ins += "__op___";
-                funct3 += "_3_";
-                funct7 += "___7___";
+                ins += "0110011";
+                funct3 += "100";
+                funct7 += "0000000";
                 break;
 
             default:
                 return ins;
         }
-    
-        
-        ins += rd + funct3 + rs1 + rs2 + funct7;
 
-        if(ins.size() == 32) return ins;
+        std::string s = funct7 + rs2 + rs1 + funct3 + rd + ins;
+
+        if(s.size() == 32) return s;
         else return "";
     }
 
 
     /*
-    I-type breakdown
-    12-bit immediate
+    I-type breakdown (12-bit immediate)
 
-    opcode   destination   funct3   source 1   imm[11:0]
-    31-25       24-20      19-17     16-12         11-0
+                    imm      rs1    funct3   rd     opcode
+    bits:           31-20   19-15   14-12   11-7     6-0
+    string index:   0-11    12-16   17-19   20-24   25-31
     */
     std::string IType(std::vector<std::string> op) {
 
         if(op.size() != 4) return "";
 
+        /*
+        in SLLI, SRLI, and SRAI, `imm` will be a 5 bit encoded shamt instead of the normal 12 bit immediate and supplemented with a funct7 value
+        */
+
         std::string opname = op[0];
         std::string rd = op[1];
         std::string rs1 = op[2];
-        std::string imm = op[3];
+        std::string imm = op[3]; 
 
         std::string ins = "";
         std::string funct3 = "";
+        std::string funct7 = ""; // only used in shift logical ops
 
         switch(str_ins_BI32.at(opname)) {
 
             case ADDI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "000";
                 break;
 
             case ANDI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "111";
                 break;
 
             case JALR:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100111";
+                funct3 += "000";
                 break;
 
             case LB:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "000";
                 break;
 
             case LBU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "100";
                 break;
 
             case LH:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "001";
                 break;
 
             case LHU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "101";
                 break;
 
             case LW:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0000011";
+                funct3 += "010";
                 break;
 
             case ORI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "110";
                 break;
 
             case SLLI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "001";
+                funct7 += "0000000";
                 break;
 
             case SLTI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "010";
                 break;
 
             case SLTIU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "011";
                 break;
 
             case SRAI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "101";
+                funct7 += "0100000";
                 break;
 
             case SRLI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "101";
+                funct7 += "0000000";
                 break;
 
             case XORI:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0010011";
+                funct3 += "100";
                 break;
 
             default:
                 return ins;
         }
     
-        ins += rd + funct3 + rs1 + imm;
+        std::string s = funct7 + imm + rs1 + funct3 + rd + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
 
     /*
-    S-type breakdown
-    12-bit immediate
+    S-type breakdown (12-bit immediate)
 
-    opcode   imm[4:0]   funct3   source 1   source 2   imm[11:5]
-    31-25     24-20      19-17    16-12      11-7        6-0
+                    imm[11:5]   rs2     rs1    funct3   imm[4:0]   opcode
+    bits:           31-25      24-20   19-15   14-12     11-7       6-0
+    string index:   0-6        7-11    12-16   17-19     20-24     25-31
     */
     std::string SType(std::vector<std::string> op) {
 
@@ -229,37 +238,37 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case SB:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0100011";
+                funct3 += "000";
                 break;
 
             case SH:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0100011";
+                funct3 += "001";
                 break;
 
             case SW:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "0100011";
+                funct3 += "010";
                 break;
 
             default:
                 return ins; 
         }
 
-        ins += imm.substr(7, 5) + funct3 + rs1 + rs2 + imm.substr(0, 7);
+        std::string s = imm.substr(0, 7) + rs2 + rs1 + funct3 + imm.substr(7, 5) + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
 
     /*
-    B-type breakdown
-    12-bit immediate
+    B-type breakdown (12-bit immediate)
 
-    opcode   imm[11]   imm[4:1]   funct3   source 1   source 2   imm[10:5]   imm[12]
-    31-25     24        23-20     19-17     16-12      11-7         6-1        0
+                    imm[12]  imm[10:5]  rs2     rs1    funct3  imm[4:1]  imm[11]  opcode
+    bits:              31      30-25   24-20   19-15   14-12     11-8      7       6-0 
+    string index:      0        1-6    7-11    12-16   17-19     20-23     24     25-31
     */
     std::string BType(std::vector<std::string> op) {
 
@@ -276,52 +285,52 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case BEQ:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "000";
                 break;
 
             case BGE:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "101";
                 break;
 
             case BGEU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "111";
                 break;
 
             case BLT:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "100";
                 break;
 
             case BLTU:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "110";
                 break;
 
             case BNE:
-                ins += "__op___";
-                funct3 += "_3_";
+                ins += "1100011";
+                funct3 += "001";
                 break;
 
             default:
                 return ins;
         }
     
-        ins += imm.substr(1, 1) + imm.substr(7, 4) + funct3 + rs1 + rs2 + imm.substr(1, 6) + imm.substr(0, 1);
+        std::string s = imm.substr(0, 1) + imm.substr(1, 6) + rs2 + rs1 + funct3 + imm.substr(7, 4) + imm.substr(1, 1) + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
 
     /*
-    U-type breakdown
-    20-bit immediate
+    U-type breakdown (20-bit immediate)
 
-    opcode   destination   imm[31-12]
-    31-25       24-20         19-0
+                    imm[31:12]   rd     opcode
+    bits:             31-12     12-7     6-0
+    string index:      0-19     20-24   25-31
     */
     std::string UType(std::vector<std::string> op) {
 
@@ -336,30 +345,30 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case AUIPC:
-                ins += "__op___";
+                ins += "0010111";
                 break;
 
             case LUI:
-                ins += "__op___";
+                ins += "0110111";
                 break;
 
             default:
                 return ins;
         }
 
-        ins += rd + imm;
+        std::string s = imm + rd + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 
 
     /*
-    J-type breakdown
-    20-bit immediate
-    
-    opcode   destination   imm[19:12]   imm[11]   imm[10:1]   imm[20]
-    31-25       24-20        19-12         11       10-1         0
+    J-type breakdown (20-bit immediate)
+
+                    imm[20]  imm[10:1]  imm[11]  imm[19:12]  rd     opcode
+    bits:              31      30-21      20       19-12    11-7     6-0
+    string index:      0       1-10       11       12-19    20-24   25-31
     */
     std::string JType(std::vector<std::string> op) {
         
@@ -374,16 +383,16 @@ namespace Encode_32I {
         switch(str_ins_BI32.at(opname)) {
 
             case JAL:
-                ins += "__op___";
+                ins += "1101111";
                 break;
 
             default:
                 return ins;
         }
 
-        ins += rd + imm.substr(1, 19) + imm.substr(0, 1);
+        std::string s = imm[0] + imm.substr(10, 10) + imm[9] + imm.substr(1, 8) + rd + ins;
 
-        if(ins.size() == 32) return ins;
+        if(s.size() == 32) return s;
         else return "";
     }
 }

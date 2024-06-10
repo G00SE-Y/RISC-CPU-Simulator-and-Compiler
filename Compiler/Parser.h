@@ -17,9 +17,8 @@ namespace Parser {
     };
 
     typedef struct Compiler_Return {
-        bool is_error = false;
         std::string error = ""; // error message
-        std::string output = ""; // compiled code
+        std::vector<std::string> output; // compiled code
     }compRet;
 
     /*
@@ -45,7 +44,7 @@ namespace Parser {
     // extern std::unordered_map<std::string, Parser::Rule> definitions;
 
     // Returns machine code from unparsed tokens if a valid syntax is given
-    Parser::Compiler_Return parse(std::vector<std::vector<Tokenizer::token>> tokens);
+    Parser::Compiler_Return parse(std::vector<std::vector<Tokenizer::Token>> tokens);
     void init_definitions(); // initializes the base values in the definitions map
 
 }
