@@ -12,10 +12,14 @@ integer file;
 reg clk;
 
 initial clk = 0;
-always #50 clk = ~clk;
+always #30 clk = ~clk;
 
 reg [31:0] instruction;
 reg [31:0] allInstructions [0:2];
+
+initial for (i = 0; i < 3; i = i + 1) allInstructions[i] = 0;
+
+initial instruction = 0;
 
 
 wire [6:0] opcode;
@@ -30,6 +34,7 @@ wire [31:0] dataOut1;
 wire [31:0] dataOut2;
 
 reg writeEn;
+initial writeEn = 0;
 
 wire [31:0] aluResultConnection;
 wire [31:0] writeFromData;
@@ -38,6 +43,11 @@ reg clkDecode;
 reg clkReg;
 reg clkAlu;
 reg clkMem;
+
+initial clkDecode = 0;
+initial clkReg = 0;
+initial clkAlu = 0;
+initial clkMem = 0;
 
 
 Decoder decoderStage(.instruction(instruction),.clk(clkDecode),.opcode(opcode),.destination(destination),.funct3(funct3),.source1(source1),.source2(source2),.funct7(funct7),.immediate(immediate));
@@ -55,24 +65,21 @@ initial begin
     file = $fopen("../../../../instructions.txt","r");
     while(!$feof(file)) begin
         $fscanf(file,"%x",instruction);
-        allInstructions[i] <= instruction;
+        allInstructions[i] = instruction;
         i = i + 1;
     end
     $fclose(file);
     i = 0;
+    instruction = allInstructions[0];
 end
 
 
 
 always @(posedge clk)begin
     instruction = allInstructions[i];
-    //Things that need to write to register 
-    if (opcode == 7'b0110111 || opcode == 7'b0010111 || opcode == 7'b1101111 || opcode == 7'b1100111 || opcode == 7'b0000011 || opcode == 7'b0010011 || opcode == 7'b0110011) writeEn = 1;
-    else writeEn = 0;
-
     if (curStage == 0) begin
         clkDecode = 1;
-        clkMem = 0;
+        clkReg = 0;
         curStage = curStage + 1;
     end
     else if (curStage == 1) begin
@@ -88,8 +95,16 @@ always @(posedge clk)begin
     else if (curStage == 3) begin
         clkMem = 1;
         clkAlu = 0;
-        curStage = 0;
-        i = i + 1;
+        curStage = curStage + 1;
+    //Things that need to write to register 
+    if (opcode == 7'b0110111 || opcode == 7'b0010111 || opcode == 7'b1101111 || opcode == 7'b1100111 || opcode == 7'b0000011 || opcode == 7'b0010011 || opcode == 7'b0110011) writeEn <= 1;
+    end
+    else begin
+    clkReg = 1;
+    clkMem = 0;
+    curStage = 0;
+    i = i + 1;
+    #1 writeEn <= 0;
     end
     
 

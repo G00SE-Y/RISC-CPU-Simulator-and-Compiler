@@ -5,9 +5,9 @@
 
 module Registers(destination,source1,source2,dataIn,writeEn,dataOut1,dataOut2,clk);
 
-input [5:0] destination;
-input [5:0] source1;
-input [5:0] source2;
+input [4:0] destination;
+input [4:0] source1;
+input [4:0] source2;
 input [31:0] dataIn;
 input clk;
 input writeEn;

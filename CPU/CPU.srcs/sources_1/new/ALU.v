@@ -40,7 +40,7 @@ assign result = internalResult;
 always @(posedge clk) begin
 
     if (immediate[11] == 1) signExtend <= 4294963200 + immediate;
-    else signExtend <= immediate;    
+    else signExtend = immediate;    
     /*
     opcode 0110011 used for ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR,  AND
     funct3:                 000, 000, 001, 010, 011,  100, 101, 101, 110, 111
